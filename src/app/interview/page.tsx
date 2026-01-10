@@ -463,27 +463,29 @@ function InterviewContent() {
         };
 
         recognitionRef.current.onresult = (event: SpeechRecognitionEventLike) => {
-          let transcript = '';
+          let fullTranscript = '';
           let currentConfidence = 0;
           let isFinal = false;
 
-          for (let i = event.resultIndex; i < event.results.length; ++i) {
-            transcript += event.results[i][0].transcript;
-            currentConfidence = event.results[i][0].confidence;
-            if (event.results[i].isFinal) isFinal = true;
+          for (let i = 0; i < event.results.length; ++i) {
+            fullTranscript += event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              isFinal = true;
+              currentConfidence = event.results[i][0].confidence;
+            }
           }
 
-          if (transcript) {
-            setInterimTranscript(transcript);
+          if (fullTranscript) {
+            setInterimTranscript(fullTranscript);
             
-            // Calculate Metrics
-            const words = transcript.trim().split(/\s+/);
+            // Calculate Metrics based on the full accumulated transcript
+            const words = fullTranscript.trim().split(/\s+/);
             const wordCount = words.length;
             const durationMinutes = (Date.now() - startTimeRef.current) / 60000;
             const speed = Math.round(wordCount / (durationMinutes || 1));
             
-            // Detect fillers
-            const fillers = (transcript.match(/uhh|umm|uh|um|like|you know/gi) || []).length;
+            // Detect fillers in the full transcript
+            const fillers = (fullTranscript.match(/uhh|umm|uh|um|like|you know/gi) || []).length;
             
             // Handle Pauses
             if (pauseTimeoutRef.current) clearTimeout(pauseTimeoutRef.current);
@@ -493,13 +495,13 @@ function InterviewContent() {
 
             setMetrics(prev => ({
               ...prev,
-              confidence: currentConfidence,
+              confidence: currentConfidence || prev.confidence,
               speed: speed > 200 ? 200 : speed, // Cap at 200 WPM
               fillers: fillers
             }));
 
             if (isFinal) {
-              handleUserResponseRef.current?.(transcript);
+              handleUserResponseRef.current?.(fullTranscript);
               recognitionRef.current?.stop();
             }
           }
@@ -590,7 +592,15 @@ function InterviewContent() {
   const handleUserResponse = async (text: string) => {
     const { currentParagraph, isCompleted, feedback, metrics } = latestStateRef.current;
     
-    if (!text.trim() || isCompleted) return;
+    // Minimum 3 words to consider it a valid response
+    const words = text.trim().split(/\s+/);
+    if (words.length < 3 || isCompleted) {
+      if (words.length > 0 && words.length < 3) {
+        setFeedback("I couldn't hear enough clearly. Please try reading the paragraph again with a steady voice.");
+        speak("I couldn't hear enough clearly. Please try reading the paragraph again with a steady voice.");
+      }
+      return;
+    }
     
     setIsLoading(true);
 
@@ -622,10 +632,12 @@ function InterviewContent() {
         const errorData = await res.json().catch(() => ({ error: "Unknown error" }));
         console.error('API Coach Error:', errorData);
         
-        if (res.status === 500 && errorData.error?.includes("OPENROUTER_API_KEY")) {
-          aiFeedback = "The AI Coach is currently unavailable because the API key is not configured in the server settings. Please contact the administrator.";
+        if (res.status === 401) {
+          aiFeedback = "API Key Error: The OpenRouter API key appears to be invalid or expired. Please check your Vercel Environment Variables.";
+        } else if (res.status === 500 && errorData.error?.includes("OPENROUTER_API_KEY")) {
+          aiFeedback = "Configuration Error: The OPENROUTER_API_KEY is missing from the server. Please add it to your Vercel Environment Variables.";
         } else {
-          aiFeedback = "I encountered a technical issue while analyzing your speech. Please try again in a moment.";
+          aiFeedback = `AI Service Error: ${errorData.error || "I encountered a technical issue while analyzing your speech. Please try again."}`;
         }
       }
 
@@ -794,12 +806,19 @@ function InterviewContent() {
                   onClick={toggleListening}
                   disabled={isLoading || isSpeaking}
                   className={`w-full sm:w-auto px-10 py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-4 shadow-xl active:scale-95 ${
-                    isListening 
+                    isLoading
+                    ? 'bg-slate-400 cursor-not-allowed text-white shadow-none'
+                    : isListening 
                     ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-200' 
                     : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200'
                   }`}
                 >
-                  {isListening ? (
+                  {isLoading ? (
+                    <>
+                      <RefreshCw className="w-5 h-5 animate-spin" />
+                      <span>Processing...</span>
+                    </>
+                  ) : isListening ? (
                     <>
                       <MicOff className="w-5 h-5" />
                       <span>Stop Session</span>

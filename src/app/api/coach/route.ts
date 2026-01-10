@@ -107,9 +107,18 @@ export async function POST(req: Request) {
 
     if (!upstream.ok) {
       const text = await upstream.text();
+      let errorMessage = "Upstream AI request failed.";
+      try {
+        const errorJson = JSON.parse(text);
+        if (errorJson.error?.message) {
+          errorMessage = errorJson.error.message;
+        }
+      } catch {
+        errorMessage = text.slice(0, 200);
+      }
       return NextResponse.json(
-        { error: "Upstream AI request failed.", details: text.slice(0, 500) },
-        { status: 502 }
+        { error: errorMessage },
+        { status: upstream.status === 401 ? 401 : 502 }
       );
     }
 
