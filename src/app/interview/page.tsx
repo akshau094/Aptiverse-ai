@@ -468,24 +468,28 @@ function InterviewContent() {
           let isFinal = false;
 
           for (let i = 0; i < event.results.length; ++i) {
-            fullTranscript += event.results[i][0].transcript;
+            // Add a space between segments for better readability and metrics
+            const segment = event.results[i][0].transcript;
+            fullTranscript += segment + ' ';
+            
             if (event.results[i].isFinal) {
               isFinal = true;
               currentConfidence = event.results[i][0].confidence;
             }
           }
 
-          if (fullTranscript) {
-            setInterimTranscript(fullTranscript);
+          const trimmedTranscript = fullTranscript.trim();
+          if (trimmedTranscript) {
+            setInterimTranscript(trimmedTranscript);
             
             // Calculate Metrics based on the full accumulated transcript
-            const words = fullTranscript.trim().split(/\s+/);
+            const words = trimmedTranscript.split(/\s+/);
             const wordCount = words.length;
             const durationMinutes = (Date.now() - startTimeRef.current) / 60000;
             const speed = Math.round(wordCount / (durationMinutes || 1));
             
             // Detect fillers in the full transcript
-            const fillers = (fullTranscript.match(/uhh|umm|uh|um|like|you know/gi) || []).length;
+            const fillers = (trimmedTranscript.match(/uhh|umm|uh|um|like|you know/gi) || []).length;
             
             // Handle Pauses
             if (pauseTimeoutRef.current) clearTimeout(pauseTimeoutRef.current);
@@ -501,8 +505,12 @@ function InterviewContent() {
             }));
 
             if (isFinal) {
-              handleUserResponseRef.current?.(fullTranscript);
-              recognitionRef.current?.stop();
+              handleUserResponseRef.current?.(trimmedTranscript);
+              // On mobile, stopping recognition immediately after final result helps stability
+              try {
+                recognitionRef.current?.stop();
+              } catch {
+              }
             }
           }
         };
@@ -536,6 +544,12 @@ function InterviewContent() {
     if (isListening) {
       try {
         recognitionRef.current?.stop();
+        
+        // On mobile, speechSynthesis.speak() MUST be triggered directly by a user click
+        // We "unlock" the audio here by speaking an empty string immediately
+        const unlock = new SpeechSynthesisUtterance("");
+        window.speechSynthesis.speak(unlock);
+
         // If we have some transcript, process it now even if isFinal hasn't triggered
         if (interimTranscript.trim()) {
           handleUserResponseRef.current?.(interimTranscript);
@@ -590,19 +604,15 @@ function InterviewContent() {
   };
 
   const handleUserResponse = async (text: string) => {
-    const { currentParagraph, isCompleted, feedback, metrics } = latestStateRef.current;
+    const { currentParagraph, isCompleted, feedback } = latestStateRef.current;
     
-    // Minimum 3 words to consider it a valid response
+    // Check if we already processed this or if it's too short
     const words = text.trim().split(/\s+/);
-    if (words.length < 3 || isCompleted) {
-      if (words.length > 0 && words.length < 3) {
-        setFeedback("I couldn't hear enough clearly. Please try reading the paragraph again with a steady voice.");
-        speak("I couldn't hear enough clearly. Please try reading the paragraph again with a steady voice.");
-      }
-      return;
-    }
+    if (words.length < 3 || isCompleted || isLoading) return;
     
     setIsLoading(true);
+    // Ensure we reset interim to prevent double triggers
+    setInterimTranscript("");
 
     try {
       const res = await fetch('/api/coach', {
