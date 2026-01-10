@@ -143,6 +143,7 @@ function InterviewContent() {
     setFocusMessage("");
     setInterimTranscript("");
     accumulatedTranscriptRef.current = "";
+    latestTranscriptRef.current = "";
     startTimeRef.current = 0;
     lastFocusWarningRef.current = 0;
     setMetrics({
@@ -449,8 +450,8 @@ function InterviewContent() {
   });
 
   const manualStopRef = useRef(false);
-
   const accumulatedTranscriptRef = useRef("");
+  const latestTranscriptRef = useRef("");
 
   const setupSpeechRecognition = () => {
     if (typeof window !== 'undefined') {
@@ -484,6 +485,7 @@ function InterviewContent() {
           }
 
           const fullTranscript = (accumulatedTranscriptRef.current + currentSessionTranscript).trim();
+          latestTranscriptRef.current = fullTranscript;
           
           if (fullTranscript) {
             setInterimTranscript(fullTranscript);
@@ -555,12 +557,18 @@ function InterviewContent() {
         
         // On mobile, speechSynthesis.speak() MUST be triggered directly by a user click
         // We "unlock" the audio here by speaking an empty string immediately
-        const unlock = new SpeechSynthesisUtterance("");
-        window.speechSynthesis.speak(unlock);
+        const unlockUtterance = new SpeechSynthesisUtterance("");
+        window.speechSynthesis.speak(unlockUtterance);
 
-        // If we have some transcript, process it now even if isFinal hasn't triggered
-        if (interimTranscript.trim()) {
-          handleUserResponseRef.current?.(interimTranscript);
+        // Use the Ref instead of state to get the absolute latest text
+        const finalTranscript = latestTranscriptRef.current.trim();
+        if (finalTranscript) {
+          handleUserResponseRef.current?.(finalTranscript);
+        } else {
+          console.warn("No transcript detected at stop.");
+          setIsListening(false);
+          setFeedback("I couldn't hear any speech. Please try reading the paragraph again.");
+          speak("I couldn't hear any speech. Please try reading the paragraph again.");
         }
       } catch (e) {
         console.error('Error stopping recognition:', e);
@@ -569,6 +577,7 @@ function InterviewContent() {
     } else {
       manualStopRef.current = false;
       accumulatedTranscriptRef.current = "";
+      latestTranscriptRef.current = "";
       setInterimTranscript("");
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
@@ -619,14 +628,23 @@ function InterviewContent() {
     
     // Check if we already processed this or if it's too short
     const words = text.trim().split(/\s+/);
-    if (words.length < 2 || isCompleted || alreadyLoading) {
-      console.log("Skipping response processing:", { wordCount: words.length, isCompleted, alreadyLoading });
+    const isTooShort = words.length < 2 && text.length < 10;
+    
+    if (isTooShort || isCompleted || alreadyLoading) {
+      console.log("Skipping response processing:", { wordCount: words.length, charCount: text.length, isCompleted, alreadyLoading });
+      if (isTooShort && !alreadyLoading && !isCompleted) {
+        setFeedback("I couldn't hear enough clearly. Please try reading the paragraph again with a steady voice.");
+        speak("I couldn't hear enough clearly. Please try reading the paragraph again with a steady voice.");
+      }
       return;
     }
     
     setIsLoading(true);
+    setFeedback(null); // Clear any previous errors/feedback
     // Ensure we reset interim to prevent double triggers
     setInterimTranscript("");
+    accumulatedTranscriptRef.current = "";
+    latestTranscriptRef.current = "";
 
     try {
       console.log("Sending to coach API...");
