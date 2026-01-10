@@ -142,6 +142,7 @@ function InterviewContent() {
     setIsFocusLost(false);
     setFocusMessage("");
     setInterimTranscript("");
+    accumulatedTranscriptRef.current = "";
     startTimeRef.current = 0;
     lastFocusWarningRef.current = 0;
     setMetrics({
@@ -447,6 +448,10 @@ function InterviewContent() {
     handleUserResponseRef.current = handleUserResponse;
   });
 
+  const manualStopRef = useRef(false);
+
+  const accumulatedTranscriptRef = useRef("");
+
   const setupSpeechRecognition = () => {
     if (typeof window !== 'undefined') {
       const SpeechRecognitionConstructor =
@@ -465,33 +470,32 @@ function InterviewContent() {
         };
 
         recognitionRef.current.onresult = (event: SpeechRecognitionEventLike) => {
-          let fullTranscript = '';
+          let currentSessionTranscript = '';
           let currentConfidence = 0;
-          let isFinal = false;
 
-          for (let i = 0; i < event.results.length; ++i) {
-            // Add a space between segments for better readability and metrics
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
             const segment = event.results[i][0].transcript;
-            fullTranscript += segment + ' ';
-            
             if (event.results[i].isFinal) {
-              isFinal = true;
+              accumulatedTranscriptRef.current += segment + ' ';
               currentConfidence = event.results[i][0].confidence;
+            } else {
+              currentSessionTranscript += segment;
             }
           }
 
-          const trimmedTranscript = fullTranscript.trim();
-          if (trimmedTranscript) {
-            setInterimTranscript(trimmedTranscript);
+          const fullTranscript = (accumulatedTranscriptRef.current + currentSessionTranscript).trim();
+          
+          if (fullTranscript) {
+            setInterimTranscript(fullTranscript);
             
             // Calculate Metrics based on the full accumulated transcript
-            const words = trimmedTranscript.split(/\s+/);
+            const words = fullTranscript.split(/\s+/);
             const wordCount = words.length;
             const durationMinutes = (Date.now() - startTimeRef.current) / 60000;
             const speed = Math.round(wordCount / (durationMinutes || 1));
             
             // Detect fillers in the full transcript
-            const fillers = (trimmedTranscript.match(/uhh|umm|uh|um|like|you know/gi) || []).length;
+            const fillers = (fullTranscript.match(/uhh|umm|uh|um|like|you know/gi) || []).length;
             
             // Handle Pauses
             if (pauseTimeoutRef.current) clearTimeout(pauseTimeoutRef.current);
@@ -505,15 +509,6 @@ function InterviewContent() {
               speed: speed > 200 ? 200 : speed, // Cap at 200 WPM
               fillers: fillers
             }));
-
-            if (isFinal) {
-              handleUserResponseRef.current?.(trimmedTranscript);
-              // On mobile, stopping recognition immediately after final result helps stability
-              try {
-                recognitionRef.current?.stop();
-              } catch {
-              }
-            }
           }
         };
 
@@ -534,7 +529,17 @@ function InterviewContent() {
         };
 
         recognitionRef.current.onend = () => {
-          setIsListening(false);
+          // If browser stopped recognition but user didn't click stop, restart it
+          // This prevents "automatic stop" on mobile during long pauses
+          if (!manualStopRef.current && isListening) {
+            try {
+              recognitionRef.current?.start();
+            } catch {
+              setIsListening(false);
+            }
+          } else {
+            setIsListening(false);
+          }
         };
       } else {
         console.error('Speech recognition not supported in this browser.');
@@ -544,6 +549,7 @@ function InterviewContent() {
 
   const toggleListening = () => {
     if (isListening) {
+      manualStopRef.current = true;
       try {
         recognitionRef.current?.stop();
         
@@ -561,6 +567,9 @@ function InterviewContent() {
         setIsListening(false);
       }
     } else {
+      manualStopRef.current = false;
+      accumulatedTranscriptRef.current = "";
+      setInterimTranscript("");
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
       
@@ -610,7 +619,7 @@ function InterviewContent() {
     
     // Check if we already processed this or if it's too short
     const words = text.trim().split(/\s+/);
-    if (words.length < 3 || isCompleted || alreadyLoading) {
+    if (words.length < 2 || isCompleted || alreadyLoading) {
       console.log("Skipping response processing:", { wordCount: words.length, isCompleted, alreadyLoading });
       return;
     }
@@ -649,11 +658,11 @@ function InterviewContent() {
         console.error('API Coach Error:', errorData);
         
         if (res.status === 401) {
-          aiFeedback = "API Key Error: The OpenRouter API key appears to be invalid or expired. Please check your Vercel Environment Variables.";
-        } else if (res.status === 500 && (errorData.error?.includes("OPENROUTER_API_KEY") || errorData.message?.includes("OPENROUTER_API_KEY"))) {
-          aiFeedback = "Configuration Error: The OPENROUTER_API_KEY is missing from the server. Please add it to your Vercel Environment Variables.";
+          aiFeedback = "ERROR: API Key is invalid. Please update OPENROUTER_API_KEY in Vercel Settings.";
+        } else if (res.status === 500 && (errorData.error?.includes("OPENROUTER_API_KEY") || errorData.message?.includes("OPENROUTER_API_KEY") || errorData.error?.includes("missing"))) {
+          aiFeedback = "ERROR: OPENROUTER_API_KEY is missing from Vercel Environment Variables. The AI cannot generate feedback without this key.";
         } else {
-          aiFeedback = `AI Service Error: ${errorData.error || errorData.message || "I encountered a technical issue while analyzing your speech. Please try again."}`;
+          aiFeedback = `AI Error: ${errorData.error || errorData.message || "The AI service is currently unavailable. Please check your internet and API keys."}`;
         }
       }
 
