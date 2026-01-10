@@ -176,9 +176,66 @@ function InterviewContent() {
   useEffect(() => {
     let stream: MediaStream | null = null;
 
+    const startAudioAnalysis = async (mediaStream: MediaStream) => {
+      try {
+        // Setup Audio Analysis
+        if (!audioContextRef.current) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        }
+        
+        const audioContext = audioContextRef.current;
+        if (audioContext.state === 'suspended') {
+          await audioContext.resume();
+        }
+
+        const source = audioContext.createMediaStreamSource(mediaStream);
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        source.connect(analyser);
+        
+        analyserRef.current = analyser;
+        dataArrayRef.current = new Uint8Array(analyser.frequencyBinCount);
+        
+        const analyzeAudio = () => {
+          if (!analyserRef.current || !dataArrayRef.current) return;
+      
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          analyserRef.current.getByteFrequencyData(dataArrayRef.current as any);
+          
+          // Calculate average volume (energy)
+          const average = dataArrayRef.current.reduce((a, b) => a + b, 0) / dataArrayRef.current.length;
+          const normalizedEnergy = Math.min(average / 128, 1); // 0 to 1
+      
+          setMetrics(prev => {
+              let newConfidence = prev.confidence;
+              if (normalizedEnergy > 0.1) {
+                  // Boost confidence if speaking loudly/clearly
+                  newConfidence = Math.min(prev.confidence + 0.005, 1.0);
+              }
+              
+              return {
+                  ...prev,
+                  energy: normalizedEnergy,
+                  confidence: newConfidence
+              };
+          });
+      
+          animationFrameRef.current = requestAnimationFrame(analyzeAudio);
+        };
+
+        analyzeAudio();
+      } catch (err) {
+        console.error("Audio analysis setup failed:", err);
+      }
+    };
+
     const startCamera = async () => {
       if (isCameraOn && videoRef.current) {
         try {
+          // We only need to request audio here if MediaPipe Camera utility doesn't handle it
+          // Actually, let's request both and give the stream to videoRef
+          // MediaPipe Camera will use the videoRef.current
           stream = await navigator.mediaDevices.getUserMedia({ 
             video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
             audio: true 
@@ -191,53 +248,7 @@ function InterviewContent() {
             };
           }
 
-          // Setup Audio Analysis
-          if (!audioContextRef.current) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-          }
-          
-          const audioContext = audioContextRef.current;
-          if (audioContext.state === 'suspended') {
-            await audioContext.resume();
-          }
-
-          const source = audioContext.createMediaStreamSource(stream);
-          const analyser = audioContext.createAnalyser();
-          analyser.fftSize = 256;
-          source.connect(analyser);
-          
-          analyserRef.current = analyser;
-          dataArrayRef.current = new Uint8Array(analyser.frequencyBinCount);
-          
-          const analyzeAudio = () => {
-            if (!analyserRef.current || !dataArrayRef.current) return;
-        
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    analyserRef.current.getByteFrequencyData(dataArrayRef.current as any);
-            
-            // Calculate average volume (energy)
-            const average = dataArrayRef.current.reduce((a, b) => a + b, 0) / dataArrayRef.current.length;
-            const normalizedEnergy = Math.min(average / 128, 1); // 0 to 1
-        
-            setMetrics(prev => {
-                let newConfidence = prev.confidence;
-                if (normalizedEnergy > 0.1) {
-                    // Boost confidence if speaking loudly/clearly
-                    newConfidence = Math.min(prev.confidence + 0.005, 1.0);
-                }
-                
-                return {
-                    ...prev,
-                    energy: normalizedEnergy,
-                    confidence: newConfidence
-                };
-            });
-        
-            animationFrameRef.current = requestAnimationFrame(analyzeAudio);
-          };
-
-          analyzeAudio();
+          await startAudioAnalysis(stream);
 
         } catch (err) {
           console.error("Camera access denied:", err);
@@ -339,16 +350,13 @@ function InterviewContent() {
     try {
       console.log("Initializing focus tracker...");
       const faceMeshModule = await import('@mediapipe/face_mesh');
-      const cameraUtilsModule = await import('@mediapipe/camera_utils');
 
       // Handle different export patterns
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const FaceMesh = faceMeshModule.FaceMesh || (faceMeshModule as any).default?.FaceMesh || (faceMeshModule as any).default;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const Camera = cameraUtilsModule.Camera || (cameraUtilsModule as any).default?.Camera || (cameraUtilsModule as any).default;
 
-      if (!FaceMesh || !Camera) {
-        throw new Error("Failed to load FaceMesh or Camera from MediaPipe modules");
+      if (!FaceMesh) {
+        throw new Error("Failed to load FaceMesh from MediaPipe modules");
       }
 
       const faceMesh = new FaceMesh({
@@ -371,7 +379,7 @@ function InterviewContent() {
           if (isCameraOn) {
             setIsFocusLost(true);
             setFocusMessage("No face detected! Please look at the camera.");
-            setMetrics(prev => ({ ...prev, focusScore: Math.max(0, prev.focusScore - 2) }));
+            setMetrics(prev => ({ ...prev, focusScore: Math.max(0, prev.focusScore - 1) }));
           }
           return;
         }
@@ -379,58 +387,54 @@ function InterviewContent() {
         const landmarks = results.multiFaceLandmarks[0];
         
         // Simple gaze/head pose estimation
-        // Landmark 1 is the nose tip, 33 is left eye, 263 is right eye
         const nose = landmarks[1];
         const leftEye = landmarks[33];
         const rightEye = landmarks[263];
 
-        // Check horizontal focus (Face turning left/right)
-        // If the nose is too far from the midpoint between eyes, the face is turned
         const eyeMidpointX = (leftEye.x + rightEye.x) / 2;
-        const faceTurnThreshold = 0.05; // Adjust this threshold for sensitivity
+        const faceTurnThreshold = 0.08; // Slightly less sensitive
 
         const horizontalDiff = nose.x - eyeMidpointX;
         
         if (Math.abs(horizontalDiff) > faceTurnThreshold) {
           setIsFocusLost(true);
           setFocusMessage(horizontalDiff > 0 ? "You're looking too far right!" : "You're looking too far left!");
-          setMetrics(prev => ({ ...prev, focusScore: Math.max(0, prev.focusScore - 1) }));
+          setMetrics(prev => ({ ...prev, focusScore: Math.max(0, prev.focusScore - 0.5) }));
         } else {
-          // Check iris position for eye gaze (more advanced)
-          // Left iris: 468
+          // Check iris position
           const leftIris = landmarks[468];
-
           const leftIrisRelativeX = (leftIris.x - leftEye.x) / (landmarks[133].x - landmarks[33].x);
-
-          const gazeThreshold = 0.15; // Adjust sensitivity
+          const gazeThreshold = 0.2; // Slightly less sensitive
           
           if (leftIrisRelativeX < (0.5 - gazeThreshold) || leftIrisRelativeX > (0.5 + gazeThreshold)) {
             setIsFocusLost(true);
             setFocusMessage("Please focus your eyes on the screen.");
-            setMetrics(prev => ({ ...prev, focusScore: Math.max(0, prev.focusScore - 0.5) }));
+            setMetrics(prev => ({ ...prev, focusScore: Math.max(0, prev.focusScore - 0.2) }));
           } else {
             setIsFocusLost(false);
             setFocusMessage("");
-            setMetrics(prev => ({ ...prev, focusScore: Math.min(100, prev.focusScore + 0.2) }));
+            setMetrics(prev => ({ ...prev, focusScore: Math.min(100, prev.focusScore + 0.1) }));
           }
         }
       });
 
       faceMeshRef.current = faceMesh;
 
-      if (videoRef.current) {
-        const camera = new Camera(videoRef.current, {
-          onFrame: async () => {
-            if (videoRef.current && isCameraOn) {
-              await faceMesh.send({ image: videoRef.current });
-            }
-          },
-          width: 640,
-          height: 480
-        });
-        camera.start();
-        cameraRef.current = camera;
-      }
+      const processFrame = async () => {
+        const { isCameraOn } = latestStateRef.current;
+        if (videoRef.current && isCameraOn && videoRef.current.readyState >= 2) {
+          try {
+            await faceMesh.send({ image: videoRef.current });
+          } catch (e) {
+            console.error("FaceMesh send error:", e);
+          }
+        }
+        // Run focus tracker at 10fps to save battery/CPU
+        setTimeout(() => requestAnimationFrame(processFrame), 100);
+      };
+
+      processFrame();
+
     } catch (error) {
       console.error("Focus tracker initialization failed:", error);
     }
@@ -530,6 +534,10 @@ function InterviewContent() {
     if (isListening) {
       try {
         recognitionRef.current?.stop();
+        // If we have some transcript, process it now even if isFinal hasn't triggered
+        if (interimTranscript.trim()) {
+          handleUserResponseRef.current?.(interimTranscript);
+        }
       } catch (e) {
         console.error('Error stopping recognition:', e);
         setIsListening(false);
@@ -611,8 +619,14 @@ function InterviewContent() {
         const data = (await res.json()) as { feedback?: string };
         aiFeedback = (data.feedback || "").trim();
       } else {
-        const errorText = await res.text();
-        console.error('API Coach Error Response:', errorText);
+        const errorData = await res.json().catch(() => ({ error: "Unknown error" }));
+        console.error('API Coach Error:', errorData);
+        
+        if (res.status === 500 && errorData.error?.includes("OPENROUTER_API_KEY")) {
+          aiFeedback = "The AI Coach is currently unavailable because the API key is not configured in the server settings. Please contact the administrator.";
+        } else {
+          aiFeedback = "I encountered a technical issue while analyzing your speech. Please try again in a moment.";
+        }
       }
 
       if (!aiFeedback) {
