@@ -110,7 +110,8 @@ function InterviewContent() {
     company,
     isCameraOn,
     isFocusLost,
-    focusMessage
+    focusMessage,
+    isLoading
   });
 
   useEffect(() => {
@@ -120,10 +121,11 @@ function InterviewContent() {
       feedback, 
       isCompleted, 
       langs, 
-      company,
+      company, 
       isCameraOn,
       isFocusLost,
-      focusMessage
+      focusMessage,
+      isLoading
     };
   });
 
@@ -604,17 +606,21 @@ function InterviewContent() {
   };
 
   const handleUserResponse = async (text: string) => {
-    const { currentParagraph, isCompleted, feedback } = latestStateRef.current;
+    const { currentParagraph, isCompleted, feedback, isLoading: alreadyLoading } = latestStateRef.current;
     
     // Check if we already processed this or if it's too short
     const words = text.trim().split(/\s+/);
-    if (words.length < 3 || isCompleted || isLoading) return;
+    if (words.length < 3 || isCompleted || alreadyLoading) {
+      console.log("Skipping response processing:", { wordCount: words.length, isCompleted, alreadyLoading });
+      return;
+    }
     
     setIsLoading(true);
     // Ensure we reset interim to prevent double triggers
     setInterimTranscript("");
 
     try {
+      console.log("Sending to coach API...");
       const res = await fetch('/api/coach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -644,10 +650,10 @@ function InterviewContent() {
         
         if (res.status === 401) {
           aiFeedback = "API Key Error: The OpenRouter API key appears to be invalid or expired. Please check your Vercel Environment Variables.";
-        } else if (res.status === 500 && errorData.error?.includes("OPENROUTER_API_KEY")) {
+        } else if (res.status === 500 && (errorData.error?.includes("OPENROUTER_API_KEY") || errorData.message?.includes("OPENROUTER_API_KEY"))) {
           aiFeedback = "Configuration Error: The OPENROUTER_API_KEY is missing from the server. Please add it to your Vercel Environment Variables.";
         } else {
-          aiFeedback = `AI Service Error: ${errorData.error || "I encountered a technical issue while analyzing your speech. Please try again."}`;
+          aiFeedback = `AI Service Error: ${errorData.error || errorData.message || "I encountered a technical issue while analyzing your speech. Please try again."}`;
         }
       }
 
@@ -661,8 +667,11 @@ function InterviewContent() {
       setIsCompleted(true);
       
       speak(`${aiFeedback}. ${nextStep}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Session step failed:', error);
+      const errorMsg = `Network or System Error: ${error.message || "Could not reach the AI service. Please check your internet connection."}`;
+      setFeedback(errorMsg);
+      speak(errorMsg);
     } finally {
       setIsLoading(false);
     }
@@ -784,6 +793,17 @@ function InterviewContent() {
                 <p className="text-2xl md:text-3xl font-medium leading-relaxed text-slate-700 tracking-tight">
                   {currentParagraph}
                 </p>
+
+                {isLoading && !isListening && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="mt-12 p-8 rounded-[2rem] bg-slate-50 border border-slate-100 flex flex-col items-center justify-center gap-4"
+                  >
+                    <div className="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin" />
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">AI is analyzing your delivery...</p>
+                  </motion.div>
+                )}
 
                 {isCompleted && feedback && (
                   <motion.div 
