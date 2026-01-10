@@ -1,0 +1,691 @@
+[
+  {
+    "id": "excel-1",
+    "category": "language",
+    "topic": "DSA",
+    "question": "What is the time complexity of Binary Search?",
+    "options": [
+      "O(n)",
+      "O(log n)",
+      "O(n log n)",
+      "O(1)"
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a DSA question from the mock database."
+  },
+  {
+    "id": "excel-2",
+    "category": "language",
+    "topic": "DSA",
+    "question": "What is the time complexity of Bubble Sort in worst case?",
+    "options": [
+      "O(n)",
+      "O(n log n)",
+      "O(n²)",
+      "O(log n)"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a DSA question from the mock database."
+  },
+  {
+    "id": "excel-3",
+    "category": "language",
+    "topic": "DSA",
+    "question": "Which data structure uses FIFO?",
+    "options": [
+      "Stack",
+      "Queue",
+      "Tree",
+      "Graph"
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a DSA question from the mock database."
+  },
+  {
+    "id": "excel-4",
+    "category": "language",
+    "topic": "DSA",
+    "question": "Which data structure uses LIFO?",
+    "options": [
+      "Queue",
+      "Array",
+      "Stack",
+      "Linked List"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a DSA question from the mock database."
+  },
+  {
+    "id": "excel-5",
+    "category": "language",
+    "topic": "DSA",
+    "question": "Which traversal is used in BFS?",
+    "options": [
+      "Stack",
+      "Queue",
+      "Recursion",
+      "Heap"
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a DSA question from the mock database."
+  },
+  {
+    "id": "excel-6",
+    "category": "language",
+    "topic": "Java",
+    "question": "What is runtime polymorphism?",
+    "options": [
+      "Method overloading",
+      "Method overriding",
+      "Constructor overloading",
+      "Multiple inheritance"
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a Java question from the mock database."
+  },
+  {
+    "id": "excel-7",
+    "category": "language",
+    "topic": "Java",
+    "question": "Which keyword is used for inheritance in Java?",
+    "options": [
+      "this",
+      "super",
+      "extends",
+      "implements"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a Java question from the mock database."
+  },
+  {
+    "id": "excel-8",
+    "category": "language",
+    "topic": "Java",
+    "question": "Which feature allows same function name with different parameters?",
+    "options": [
+      "Inheritance",
+      "Encapsulation",
+      "Polymorphism",
+      "Abstraction"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a Java question from the mock database."
+  },
+  {
+    "id": "excel-9",
+    "category": "language",
+    "topic": "Java",
+    "question": "Destructor is automatically called in?",
+    "options": [
+      "Java",
+      "Python",
+      "C++",
+      "JavaScript"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a Java question from the mock database."
+  },
+  {
+    "id": "excel-10",
+    "category": "language",
+    "topic": "Java",
+    "question": "Which OOP concept hides internal implementation?",
+    "options": [
+      "Inheritance",
+      "Abstraction",
+      "Polymorphism",
+      "Overloading"
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a Java question from the mock database."
+  },
+  {
+    "id": "excel-11",
+    "category": "language",
+    "topic": "C++",
+    "question": "Which operator is used to access address in C?",
+    "options": [
+      "*",
+      "&",
+      "->",
+      "%"
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a C++ question from the mock database."
+  },
+  {
+    "id": "excel-12",
+    "category": "language",
+    "topic": "C++",
+    "question": "Which function is used to allocate memory dynamically in C?",
+    "options": [
+      "malloc()",
+      "alloc()",
+      "new()",
+      "create()"
+    ],
+    "correctAnswer": 0,
+    "explanation": "This is a C++ question from the mock database."
+  },
+  {
+    "id": "excel-13",
+    "category": "language",
+    "topic": "C++",
+    "question": "What is size of int in C (commonly)?",
+    "options": [
+      "2 bytes",
+      "4 bytes",
+      "8 bytes",
+      "Depends on compiler"
+    ],
+    "correctAnswer": 3,
+    "explanation": "This is a C++ question from the mock database."
+  },
+  {
+    "id": "excel-14",
+    "category": "language",
+    "topic": "C++",
+    "question": "Which keyword is used to define constant in C?",
+    "options": [
+      "const",
+      "define",
+      "static",
+      "final"
+    ],
+    "correctAnswer": 0,
+    "explanation": "This is a C++ question from the mock database."
+  },
+  {
+    "id": "excel-15",
+    "category": "language",
+    "topic": "C++",
+    "question": "Which loop executes at least once?",
+    "options": [
+      "for",
+      "while",
+      "do-while",
+      "foreach"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a C++ question from the mock database."
+  },
+  {
+    "id": "excel-16",
+    "category": "language",
+    "topic": "Python",
+    "question": "Which data type is immutable in Python?",
+    "options": [
+      "List",
+      "Set",
+      "Dictionary",
+      "Tuple"
+    ],
+    "correctAnswer": 3,
+    "explanation": "This is a Python question from the mock database."
+  },
+  {
+    "id": "excel-17",
+    "category": "language",
+    "topic": "Python",
+    "question": "What is the output of len([1,2,3])?",
+    "options": [
+      "2",
+      "3",
+      "Error",
+      7
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a Python question from the mock database."
+  },
+  {
+    "id": "excel-18",
+    "category": "language",
+    "topic": "Python",
+    "question": "Which keyword is used to define function in Python?",
+    "options": [
+      "function",
+      "def",
+      "fun",
+      "define"
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a Python question from the mock database."
+  },
+  {
+    "id": "excel-19",
+    "category": "language",
+    "topic": "Python",
+    "question": "Which symbol is used for comments in Python?",
+    "options": [
+      "//",
+      "/* */",
+      "#",
+      "--"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a Python question from the mock database."
+  },
+  {
+    "id": "excel-20",
+    "category": "language",
+    "topic": "Python",
+    "question": "Which exception is raised when dividing by zero?",
+    "options": [
+      "ValueError",
+      "TypeError",
+      "ZeroDivisionError",
+      "IndexError"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a Python question from the mock database."
+  },
+  {
+    "id": "excel-21",
+    "category": "language",
+    "topic": "JavaScript",
+    "question": "Which keyword declares a constant in JavaScript?",
+    "options": [
+      "var",
+      "let",
+      "const",
+      "static"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a JavaScript question from the mock database."
+  },
+  {
+    "id": "excel-22",
+    "category": "language",
+    "topic": "JavaScript",
+    "question": "Which symbol is used for strict equality in JS?",
+    "options": [
+      "=",
+      "!="
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a JavaScript question from the mock database."
+  },
+  {
+    "id": "excel-23",
+    "category": "language",
+    "topic": "JavaScript",
+    "question": "JavaScript is a ___ typed language.",
+    "options": [
+      "Statically",
+      "Strongly",
+      "Dynamically"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a JavaScript question from the mock database."
+  },
+  {
+    "id": "excel-24",
+    "category": "language",
+    "topic": "JavaScript",
+    "question": "Which method converts JSON to object?",
+    "options": [
+      "JSON.parse()",
+      "JSON.stringify()",
+      "parseJSON()",
+      "toObject()"
+    ],
+    "correctAnswer": 0,
+    "explanation": "This is a JavaScript question from the mock database."
+  },
+  {
+    "id": "excel-25",
+    "category": "language",
+    "topic": "JavaScript",
+    "question": "Which keyword defines arrow function?",
+    "options": [
+      "->",
+      "::"
+    ],
+    "correctAnswer": 0,
+    "explanation": "This is a JavaScript question from the mock database."
+  },
+  {
+    "id": "excel-26",
+    "category": "language",
+    "topic": "DSA",
+    "question": "What is the time complexity of Binary Search?",
+    "options": [
+      "O(n)",
+      "O(log n)",
+      "O(n log n)",
+      "O(1)"
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a DSA question from the mock database."
+  },
+  {
+    "id": "excel-27",
+    "category": "language",
+    "topic": "DSA",
+    "question": "What is the time complexity of Bubble Sort in worst case?",
+    "options": [
+      "O(n)",
+      "O(n log n)",
+      "O(n²)",
+      "O(log n)"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a DSA question from the mock database."
+  },
+  {
+    "id": "excel-28",
+    "category": "language",
+    "topic": "DSA",
+    "question": "Which data structure uses FIFO?",
+    "options": [
+      "Stack",
+      "Queue",
+      "Tree",
+      "Graph"
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a DSA question from the mock database."
+  },
+  {
+    "id": "excel-29",
+    "category": "language",
+    "topic": "DSA",
+    "question": "Which data structure uses LIFO?",
+    "options": [
+      "Queue",
+      "Array",
+      "Stack",
+      "Linked List"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a DSA question from the mock database."
+  },
+  {
+    "id": "excel-30",
+    "category": "language",
+    "topic": "DSA",
+    "question": "Which traversal is used in BFS?",
+    "options": [
+      "Stack",
+      "Queue",
+      "Recursion",
+      "Heap"
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a DSA question from the mock database."
+  },
+  {
+    "id": "excel-31",
+    "category": "language",
+    "topic": "Java",
+    "question": "What is runtime polymorphism?",
+    "options": [
+      "Method overloading",
+      "Method overriding",
+      "Constructor overloading",
+      "Multiple inheritance"
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a Java question from the mock database."
+  },
+  {
+    "id": "excel-32",
+    "category": "language",
+    "topic": "Java",
+    "question": "Which keyword is used for inheritance in Java?",
+    "options": [
+      "this",
+      "super",
+      "extends",
+      "implements"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a Java question from the mock database."
+  },
+  {
+    "id": "excel-33",
+    "category": "language",
+    "topic": "Java",
+    "question": "Which feature allows same function name with different parameters?",
+    "options": [
+      "Inheritance",
+      "Encapsulation",
+      "Polymorphism",
+      "Abstraction"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a Java question from the mock database."
+  },
+  {
+    "id": "excel-34",
+    "category": "language",
+    "topic": "Java",
+    "question": "Destructor is automatically called in?",
+    "options": [
+      "Java",
+      "Python",
+      "C++",
+      "JavaScript"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a Java question from the mock database."
+  },
+  {
+    "id": "excel-35",
+    "category": "language",
+    "topic": "Java",
+    "question": "Which OOP concept hides internal implementation?",
+    "options": [
+      "Inheritance",
+      "Abstraction",
+      "Polymorphism",
+      "Overloading"
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a Java question from the mock database."
+  },
+  {
+    "id": "excel-36",
+    "category": "language",
+    "topic": "C++",
+    "question": "Which operator is used to access address in C?",
+    "options": [
+      "*",
+      "&",
+      "->",
+      "%"
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a C++ question from the mock database."
+  },
+  {
+    "id": "excel-37",
+    "category": "language",
+    "topic": "C++",
+    "question": "Which function is used to allocate memory dynamically in C?",
+    "options": [
+      "malloc()",
+      "alloc()",
+      "new()",
+      "create()"
+    ],
+    "correctAnswer": 0,
+    "explanation": "This is a C++ question from the mock database."
+  },
+  {
+    "id": "excel-38",
+    "category": "language",
+    "topic": "C++",
+    "question": "What is size of int in C (commonly)?",
+    "options": [
+      "2 bytes",
+      "4 bytes",
+      "8 bytes",
+      "Depends on compiler"
+    ],
+    "correctAnswer": 3,
+    "explanation": "This is a C++ question from the mock database."
+  },
+  {
+    "id": "excel-39",
+    "category": "language",
+    "topic": "C++",
+    "question": "Which keyword is used to define constant in C?",
+    "options": [
+      "const",
+      "define",
+      "static",
+      "final"
+    ],
+    "correctAnswer": 0,
+    "explanation": "This is a C++ question from the mock database."
+  },
+  {
+    "id": "excel-40",
+    "category": "language",
+    "topic": "C++",
+    "question": "Which loop executes at least once?",
+    "options": [
+      "for",
+      "while",
+      "do-while",
+      "foreach"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a C++ question from the mock database."
+  },
+  {
+    "id": "excel-41",
+    "category": "language",
+    "topic": "Python",
+    "question": "Which data type is immutable in Python?",
+    "options": [
+      "List",
+      "Set",
+      "Dictionary",
+      "Tuple"
+    ],
+    "correctAnswer": 3,
+    "explanation": "This is a Python question from the mock database."
+  },
+  {
+    "id": "excel-42",
+    "category": "language",
+    "topic": "Python",
+    "question": "What is the output of len([1,2,3])?",
+    "options": [
+      "2",
+      "3",
+      "Error"
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a Python question from the mock database."
+  },
+  {
+    "id": "excel-43",
+    "category": "language",
+    "topic": "Python",
+    "question": "Which keyword is used to define function in Python?",
+    "options": [
+      "function",
+      "def",
+      "fun",
+      "define"
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a Python question from the mock database."
+  },
+  {
+    "id": "excel-44",
+    "category": "language",
+    "topic": "Python",
+    "question": "Which symbol is used for comments in Python?",
+    "options": [
+      "//",
+      "/* */",
+      "#",
+      "--"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a Python question from the mock database."
+  },
+  {
+    "id": "excel-45",
+    "category": "language",
+    "topic": "Python",
+    "question": "Which exception is raised when dividing by zero?",
+    "options": [
+      "ValueError",
+      "TypeError",
+      "ZeroDivisionError",
+      "IndexError"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a Python question from the mock database."
+  },
+  {
+    "id": "excel-46",
+    "category": "language",
+    "topic": "JavaScript",
+    "question": "Which keyword declares a constant in JavaScript?",
+    "options": [
+      "var",
+      "let",
+      "const",
+      "static"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a JavaScript question from the mock database."
+  },
+  {
+    "id": "excel-47",
+    "category": "language",
+    "topic": "JavaScript",
+    "question": "Which symbol is used for strict equality in JS?",
+    "options": [
+      "=",
+      "!="
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a JavaScript question from the mock database."
+  },
+  {
+    "id": "excel-48",
+    "category": "language",
+    "topic": "JavaScript",
+    "question": "JavaScript is a ___ typed language.",
+    "options": [
+      "Statically",
+      "Strongly",
+      "Dynamically"
+    ],
+    "correctAnswer": 2,
+    "explanation": "This is a JavaScript question from the mock database."
+  },
+  {
+    "id": "excel-49",
+    "category": "language",
+    "topic": "JavaScript",
+    "question": "Which method converts JSON to object?",
+    "options": [
+      "JSON.parse()",
+      "JSON.stringify()",
+      "parseJSON()",
+      "toObject()"
+    ],
+    "correctAnswer": 0,
+    "explanation": "This is a JavaScript question from the mock database."
+  },
+  {
+    "id": "excel-50",
+    "category": "language",
+    "topic": "JavaScript",
+    "question": "Which keyword defines arrow function?",
+    "options": [
+      "->",
+      "::"
+    ],
+    "correctAnswer": 0,
+    "explanation": "This is a JavaScript question from the mock database."
+  }
+]
