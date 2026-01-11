@@ -7,7 +7,6 @@ import { CheckCircle2, XCircle, ChevronRight, Trophy, Timer, Bot, Sparkles, Load
 import Link from 'next/link';
 import Scene from '@/components/Scene';
 import { getQuestions, Question } from '@/lib/questions';
-import { getAptitudeExplanation } from '@/lib/gemini';
 
 function TestContent() {
   const searchParams = useSearchParams();
@@ -64,13 +63,23 @@ function TestContent() {
       // Trigger AI Chatbot for wrong answers
       setIsAiLoading(true);
       try {
-        const explanation = await getAptitudeExplanation(
-          currentQ.question,
-          currentQ.options[currentQ.correctAnswer],
-          currentQ.options[index]
-        );
-        setAiExplanation(explanation);
-        speak(explanation);
+        const response = await fetch('/api/aptitude/explain', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question: currentQ.question,
+            correctAnswer: currentQ.options[currentQ.correctAnswer],
+            userAnswer: currentQ.options[index]
+          })
+        });
+        
+        const data = await response.json();
+        if (data.explanation) {
+          setAiExplanation(data.explanation);
+          speak(data.explanation);
+        } else {
+          throw new Error("No explanation");
+        }
       } catch {
         const fallback = `The correct answer is ${currentQ.options[currentQ.correctAnswer]}. It satisfies the logic required by the question.`;
         setAiExplanation(fallback);
