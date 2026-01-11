@@ -60,6 +60,9 @@ function TestContent() {
       setScore(prev => prev + 1);
       setAiExplanation(null);
     } else {
+      // Immediately speak the required phrase for wrong answers
+      speak("AptiVerse.Live Assessment");
+      
       // Trigger AI Chatbot for wrong answers
       setIsAiLoading(true);
       try {
