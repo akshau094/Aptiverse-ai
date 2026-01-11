@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, MicOff, MessageSquare, ArrowLeft, RefreshCw, Volume2, VolumeX, Sparkles, Video, VideoOff, Activity, Award } from 'lucide-react';
+import { Mic, MicOff, MessageSquare, ArrowLeft, RefreshCw, Volume2, VolumeX, Sparkles, Video, VideoOff, Activity, Award, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { startInterview } from '@/lib/gemini';
@@ -837,17 +837,46 @@ function InterviewContent() {
                   <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-12 p-8 rounded-[2rem] bg-blue-50 border border-blue-100"
+                    className={`mt-12 p-8 rounded-[2rem] border ${
+                      feedback.startsWith("ERROR") || feedback.startsWith("AI Error") || feedback.startsWith("Network")
+                      ? "bg-rose-50 border-rose-100" 
+                      : "bg-blue-50 border-blue-100"
+                    }`}
                   >
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white">
-                        <Award className="w-4 h-4" />
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white ${
+                        feedback.startsWith("ERROR") || feedback.startsWith("AI Error") || feedback.startsWith("Network")
+                        ? "bg-rose-600" 
+                        : "bg-blue-600"
+                      }`}>
+                        {feedback.startsWith("ERROR") || feedback.startsWith("AI Error") || feedback.startsWith("Network") 
+                          ? <AlertCircle className="w-4 h-4" /> 
+                          : <Award className="w-4 h-4" />
+                        }
                       </div>
-                      <h4 className="font-bold text-blue-900">Expert Feedback</h4>
+                      <h4 className={`font-bold ${
+                        feedback.startsWith("ERROR") || feedback.startsWith("AI Error") || feedback.startsWith("Network")
+                        ? "text-rose-900" 
+                        : "text-blue-900"
+                      }`}>
+                        {feedback.startsWith("ERROR") || feedback.startsWith("AI Error") || feedback.startsWith("Network")
+                          ? "System Message" 
+                          : "Expert Feedback"
+                        }
+                      </h4>
                     </div>
-                    <p className="text-blue-800 leading-relaxed font-medium">
+                    <p className={`leading-relaxed font-medium ${
+                      feedback.startsWith("ERROR") || feedback.startsWith("AI Error") || feedback.startsWith("Network")
+                      ? "text-rose-800" 
+                      : "text-blue-800"
+                    }`}>
                       {feedback}
                     </p>
+                    {feedback.includes("OPENROUTER_API_KEY") && (
+                      <div className="mt-4 p-4 bg-white/50 rounded-xl border border-rose-200 text-sm text-rose-700">
+                        <strong>How to fix:</strong> Go to your Vercel Dashboard → Project Settings → Environment Variables. Add <code>OPENROUTER_API_KEY</code> with your key from OpenRouter.ai, then redeploy the project.
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </div>
