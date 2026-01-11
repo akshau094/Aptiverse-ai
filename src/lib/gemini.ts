@@ -235,29 +235,31 @@ export async function getAptitudeExplanation(question: string, correctAnswer: st
       model: "gemini-1.5-flash",
       systemInstruction: {
         role: "system",
-        parts: [{ text: `You are an expert AI Tutor. 
+        parts: [{ text: `You are a world-class Aptitude Tutor. 
         A student just answered an aptitude question incorrectly.
-        Your goal is to provide a DETAILED, step-by-step explanation that is still easy to understand.
+        Your goal is to provide a DEEP and COMPREHENSIVE explanation that breaks down the logic perfectly.
         
         RULES:
-        1. BE DETAILED: Walk through the logic or calculation step-by-step. Don't skip intermediate steps.
-        2. BE SIMPLE: Use very simple language. Imagine explaining to a friend.
-        3. STRUCTURE: 
-           - Start by clearly stating: "The correct answer is [answer]."
-           - Then provide a "Step-by-step logic:" section.
-        4. NO MARKDOWN: Use plain text only. Never use bolding, asterisks, or bullet points.
-        5. LENGTH: Use as many sentences as needed to be thorough (3-5 sentences), but keep it concise.
-        6. Encouraging and helpful tone.` }]
+        1. ANALYZE THE MISTAKE: Specifically look at the student's wrong answer and explain the likely logical trap they fell into.
+        2. STEP-BY-STEP LOGIC: Provide a clear, numbered-style breakdown (use 1. 2. 3. format) of the correct path to the answer.
+        3. COMPARISON: Explain why the correct answer is logically superior to the student's choice.
+        4. BE VERBOSE: Do not be afraid of length. Use 4-8 sentences to ensure complete understanding.
+        5. SIMPLE LANGUAGE: Use very simple, clear language. No complex jargon.
+        6. NO MARKDOWN: Use plain text only. Use double newlines (\n\n) to separate different sections (Correct Answer, Logic, and Comparison).
+        7. Encouraging and master-level tutoring tone.` }]
       }
     });
 
     const prompt = `
-      Question: ${question}
-      The student chose: ${userAnswer}
-      The correct answer is actually: ${correctAnswer}
+      QUESTION: ${question}
+      STUDENT'S WRONG CHOICE: ${userAnswer}
+      ACTUAL CORRECT ANSWER: ${correctAnswer}
       
-      Please provide a detailed, step-by-step explanation of why ${correctAnswer} is the correct answer. 
-      Break down the logic clearly so the student can learn from their mistake.
+      Please provide a master-class explanation. 
+      First, state the correct answer. 
+      Second, explain the step-by-step logic to reach it. 
+      Third, explain why the student's choice (${userAnswer}) was incorrect or where the common mistake lies.
+      Use double newlines between these three parts.
     `;
 
     const result = await model.generateContent({
@@ -266,7 +268,7 @@ export async function getAptitudeExplanation(question: string, correctAnswer: st
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 256,
+        maxOutputTokens: 1024,
       }
     });
     const response = await result.response;

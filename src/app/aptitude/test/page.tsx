@@ -304,9 +304,13 @@ function TestContent() {
                             </div>
                           ) : (
                             <div className="space-y-6">
-                              <p className="text-slate-700 leading-relaxed text-xl font-medium italic">
-                                &quot;{aiExplanation}&quot;
-                              </p>
+                              <div className="space-y-4">
+                                {aiExplanation?.split('\n\n').map((paragraph, i) => (
+                                  <p key={i} className="text-slate-700 leading-relaxed text-lg font-medium">
+                                    {paragraph.trim()}
+                                  </p>
+                                ))}
+                              </div>
                               <div className="pt-6 border-t border-slate-200 flex items-center gap-3">
                                 <div className="flex -space-x-2">
                                   {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full bg-slate-200 border-2 border-white" />)}
