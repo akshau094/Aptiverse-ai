@@ -693,9 +693,9 @@ function InterviewContent() {
         console.error('API Coach Error:', errorData);
         
         if (res.status === 401) {
-          aiFeedback = "ERROR: API Key is invalid. Please update OPENROUTER_API_KEY in Vercel Settings.";
-        } else if (res.status === 500 && (errorData.error?.includes("OPENROUTER_API_KEY") || errorData.message?.includes("OPENROUTER_API_KEY") || errorData.error?.includes("missing"))) {
-          aiFeedback = "ERROR: OPENROUTER_API_KEY is missing from Vercel Environment Variables. The AI cannot generate feedback without this key.";
+          aiFeedback = "ERROR: API Key is invalid. Please update NEXT_PUBLIC_GEMINI_API_KEY in Vercel Settings.";
+        } else if (res.status === 500 && (errorData.error?.includes("GEMINI_API_KEY") || errorData.details?.includes("API_KEY") || errorData.error?.includes("missing"))) {
+          aiFeedback = "ERROR: NEXT_PUBLIC_GEMINI_API_KEY is missing from Vercel Environment Variables. The AI cannot generate feedback without this key.";
         } else {
           aiFeedback = `AI Error: ${errorData.error || errorData.message || "The AI service is currently unavailable. Please check your internet and API keys."}`;
         }
@@ -921,9 +921,9 @@ function InterviewContent() {
                     }`}>
                       {feedback}
                     </p>
-                    {feedback.includes("OPENROUTER_API_KEY") && (
-                      <div className="mt-4 p-4 bg-white/50 rounded-xl border border-rose-200 text-sm text-rose-700">
-                        <strong>How to fix:</strong> Go to your Vercel Dashboard → Project Settings → Environment Variables. Add <code>OPENROUTER_API_KEY</code> with your key from OpenRouter.ai, then redeploy the project.
+                    {feedback.includes("GEMINI_API_KEY") && (
+                      <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-2xl text-sm text-red-700">
+                        <strong>How to fix:</strong> Go to your Vercel Dashboard → Project Settings → Environment Variables. Add <code>NEXT_PUBLIC_GEMINI_API_KEY</code> with your key <code>{process.env.NEXT_PUBLIC_GEMINI_API_KEY || "AIzaSy..."}</code>, then redeploy the project.
                       </div>
                     )}
                   </motion.div>
