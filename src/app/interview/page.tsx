@@ -284,6 +284,23 @@ function InterviewContent() {
     };
   }, [isCameraOn]);
 
+  const [debugMode, setDebugMode] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<{api: string, keyPresent: boolean}[]>([]);
+
+  const checkApiStatus = async () => {
+    const info = [
+      { api: "Gemini (Client)", keyPresent: !!process.env.NEXT_PUBLIC_GEMINI_API_KEY },
+    ];
+    
+    try {
+      const res = await fetch('/api/coach', { method: 'OPTIONS' }).catch(() => ({ ok: false }));
+      // We'll add a simple health check to the coach route too
+    } catch (e) {}
+    
+    setDebugInfo(info);
+    setDebugMode(true);
+  };
+
   // Initialize Skilled Builder Session
   const initInterview = async () => {
     setIsLoading(true);
@@ -745,9 +762,16 @@ function InterviewContent() {
                 ? 'bg-rose-50 border-rose-100 text-rose-600' 
                 : 'bg-slate-50 border-slate-100 text-slate-400 hover:text-blue-600 hover:border-blue-100'
               }`}
-              title={isMuted ? "Unmute" : "Mute"}
+              title={isMuted ? "Unmute AI" : "Mute AI"}
             >
               {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            </button>
+            <button
+              onClick={checkApiStatus}
+              className="p-3 rounded-2xl hover:bg-slate-50 border border-slate-100 text-slate-400 hover:text-blue-600 transition-all"
+              title="Check Connection"
+            >
+              <Activity className="w-5 h-5" />
             </button>
             <button
               onClick={resetInterview}
@@ -758,6 +782,31 @@ function InterviewContent() {
             </button>
           </div>
         </header>
+
+        {debugMode && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="mb-8 p-6 rounded-[2rem] bg-slate-900 text-white font-mono text-xs"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h5 className="text-blue-400 font-bold uppercase tracking-widest">System Connection Diagnostics</h5>
+              <button onClick={() => setDebugMode(false)} className="text-slate-500 hover:text-white text-lg">×</button>
+            </div>
+            <div className="space-y-2">
+              <p className="text-slate-400">Device: {typeof window !== 'undefined' ? window.navigator.userAgent.slice(0, 70) + '...' : 'Unknown'}</p>
+              {debugInfo.map((info, i) => (
+                <p key={i} className="flex items-center gap-2">
+                  <span className={info.keyPresent ? "text-emerald-400" : "text-rose-400"}>
+                    {info.keyPresent ? "✓" : "✗"}
+                  </span>
+                  {info.api}: {info.keyPresent ? "Key Detected" : "KEY MISSING"}
+                </p>
+              ))}
+              <p className="mt-4 text-slate-500 italic">Tip: If keys show "MISSING" but you added them to Vercel, you must go to the "Deployments" tab in Vercel and click "Redeploy" to activate them.</p>
+            </div>
+          </motion.div>
+        )}
 
         <div className="grid lg:grid-cols-12 gap-8 items-start">
           
