@@ -698,6 +698,7 @@ function InterviewContent() {
       console.error('Session step failed:', error);
       const errorMsg = `Network or System Error: ${error.message || "Could not reach the AI service. Please check your internet connection."}`;
       setFeedback(errorMsg);
+      setIsCompleted(true);
       speak(errorMsg);
     } finally {
       setIsLoading(false);

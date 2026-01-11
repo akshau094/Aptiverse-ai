@@ -102,7 +102,7 @@ export async function POST(req: Request) {
         top_p: 1,
         frequency_penalty: 0.5,
         presence_penalty: 0.5,
-      }),  messages: [
+        messages: [
           { role: "system", content: system },
           { role: "user", content: user },
         ],
