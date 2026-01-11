@@ -224,3 +224,59 @@ export async function reviewGoCode(challengeTitle: string, problemStatement: str
     return "FEEDBACK: I encountered an error while reviewing your code. Please try submitting again.";
   }
 }
+
+export async function getAptitudeExplanation(question: string, correctAnswer: string, userAnswer: string) {
+  if (!apiKey) {
+    console.error("Gemini API key is missing. Please set NEXT_PUBLIC_GEMINI_API_KEY in your environment.");
+    return `The correct answer is ${correctAnswer}. (AI explanation unavailable: API key missing)`;
+  }
+  try {
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      systemInstruction: {
+        role: "system",
+        parts: [{ text: `You are a world-class Aptitude Tutor. 
+        A student just answered an aptitude question incorrectly.
+        Your goal is to provide a structured, deep, and comprehensive explanation.
+        
+        STRICT RESPONSE STRUCTURE:
+        1. THE CORRECT ANSWER: Start by clearly stating "The correct answer is [correctAnswer]".
+        2. WHY IT IS RIGHT: Provide a detailed, step-by-step logical breakdown of how to reach the correct answer. Explain the concepts clearly.
+        3. WHY YOUR ANSWER WAS WRONG: Analyze the student's choice [userAnswer] and explain the specific logical error, trap, or misunderstanding that leads to that wrong choice.
+        
+        RULES:
+        - BE VERBOSE: Use at least 6-10 sentences in total.
+        - SIMPLE LANGUAGE: Use clear, easy-to-understand language.
+        - NO MARKDOWN: No asterisks, no bolding, no bullet points. Use plain text only.
+        - SEPARATION: Use double newlines (\n\n) between the three sections.
+        - TONE: Professional, encouraging, and master-level tutoring.` }]
+      }
+    });
+
+    const prompt = `
+      QUESTION: ${question}
+      STUDENT'S WRONG CHOICE: ${userAnswer}
+      ACTUAL CORRECT ANSWER: ${correctAnswer}
+        
+      Provide the explanation following the three-section structure exactly.
+      Section 1: The correct answer.
+      Section 2: Detailed logic of why the correct answer is right.
+      Section 3: Analysis of why the student's choice (${userAnswer}) is incorrect.
+    `;
+
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.8,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 1024,
+      }
+    });
+    const response = await result.response;
+    return response.text().replace(/\*/g, '').trim();
+  } catch (error) {
+    console.error("Error getting AI explanation:", error);
+    return `The correct answer is ${correctAnswer}. This satisfies the logic of the question. Your choice of ${userAnswer} was incorrect because it does not follow the required pattern. Keep practicing!`;
+  }
+}
