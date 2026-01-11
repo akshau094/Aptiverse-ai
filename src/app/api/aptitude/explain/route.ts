@@ -47,6 +47,14 @@ Please provide the detailed explanation following the rules above.`;
       }),
     });
 
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("OpenRouter API Error Response:", errorData);
+      return NextResponse.json({ 
+        explanation: `API Error (${response.status}): ${errorData.error?.message || "Failed to connect to AI service"}. Please ensure your OpenRouter account has credits and the key is correct.`
+      });
+    }
+
     const data = await response.json();
     
     if (data.error) {
