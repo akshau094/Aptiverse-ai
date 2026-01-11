@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, XCircle, ChevronRight, Trophy, Timer, Bot, Sparkles, Loader2 } from 'lucide-react';
+import { CheckCircle2, XCircle, ChevronRight, Trophy, Timer, Bot, Sparkles, Loader2, Volume2, VolumeX } from 'lucide-react';
 import Link from 'next/link';
 import Scene from '@/components/Scene';
 import { getQuestions, Question } from '@/lib/questions';
@@ -21,6 +21,20 @@ function TestContent() {
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
   const [aiExplanation, setAiExplanation] = useState<string | null>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  const speak = (text: string) => {
+    if (isMuted) return;
+    
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    window.speechSynthesis.speak(utterance);
+  };
 
   useEffect(() => {
     const langs = searchParams.get('langs')?.split(',') || [];
@@ -56,8 +70,11 @@ function TestContent() {
           currentQ.options[index]
         );
         setAiExplanation(explanation);
+        speak(explanation);
       } catch {
-        setAiExplanation(`The correct answer is ${currentQ.options[currentQ.correctAnswer]}. It satisfies the logic required by the question.`);
+        const fallback = `The correct answer is ${currentQ.options[currentQ.correctAnswer]}. It satisfies the logic required by the question.`;
+        setAiExplanation(fallback);
+        speak(fallback);
       } finally {
         setIsAiLoading(false);
       }
@@ -66,6 +83,7 @@ function TestContent() {
   };
 
   const nextQuestion = () => {
+    window.speechSynthesis.cancel();
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(prev => prev + 1);
       setSelectedOption(null);
@@ -291,8 +309,26 @@ function TestContent() {
                               <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Step-by-step guidance</p>
                             </div>
                           </div>
-                          <div className="px-4 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                            Deep Learning Mode
+                          <div className="flex items-center gap-5">
+                            <button 
+                              onClick={() => {
+                                if (isMuted) {
+                                  setIsMuted(false);
+                                  if (aiExplanation) speak(aiExplanation);
+                                } else {
+                                  setIsMuted(true);
+                                  window.speechSynthesis.cancel();
+                                }
+                              }}
+                              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                                isMuted ? 'bg-slate-100 text-slate-400' : 'bg-blue-50 text-blue-600'
+                              }`}
+                            >
+                              {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} className={isSpeaking ? "animate-bounce" : ""} />}
+                            </button>
+                            <div className="px-4 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                              Deep Learning Mode
+                            </div>
                           </div>
                         </div>
 
