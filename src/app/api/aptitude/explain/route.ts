@@ -48,7 +48,22 @@ Please provide the detailed explanation following the rules above.`;
     });
 
     const data = await response.json();
-    const text = data.choices?.[0]?.message?.content || "No explanation generated.";
+    
+    if (data.error) {
+      console.error("OpenRouter API Error:", data.error);
+      return NextResponse.json({ 
+        explanation: `AI Error: ${data.error.message || "Unknown error from OpenRouter"}. Please check your API key and balance.` 
+      });
+    }
+
+    const text = data.choices?.[0]?.message?.content;
+    
+    if (!text) {
+      console.error("OpenRouter Empty Response:", data);
+      return NextResponse.json({ 
+        explanation: "No explanation generated. The AI service returned an empty response. Please try again." 
+      });
+    }
     
     return NextResponse.json({ explanation: text.trim() });
   } catch (error) {
