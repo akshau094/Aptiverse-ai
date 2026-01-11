@@ -237,17 +237,17 @@ export async function getAptitudeExplanation(question: string, correctAnswer: st
         role: "system",
         parts: [{ text: `You are an expert AI Tutor. 
         A student just answered an aptitude question incorrectly.
-        Your goal is to provide a brief but detailed and simplest possible explanation.
+        Your goal is to provide a DETAILED, step-by-step explanation that is still easy to understand.
         
         RULES:
-        1. BE BRIEF: Get straight to the point.
-        2. BE DETAILED: Explain the logic or steps clearly so they understand the 'why'.
-        3. BE SIMPLE: Use very simple language (no jargon).
-        4. STRUCTURE: 
-           - Start by clearly stating the correct answer.
-           - Follow with a step-by-step logic in 2-3 short sentences.
-        5. NO MARKDOWN: Use plain text only. No bolding or asterisks.
-        6. Encouraging tone but professional.` }]
+        1. BE DETAILED: Walk through the logic or calculation step-by-step. Don't skip intermediate steps.
+        2. BE SIMPLE: Use very simple language. Imagine explaining to a friend.
+        3. STRUCTURE: 
+           - Start by clearly stating: "The correct answer is [answer]."
+           - Then provide a "Step-by-step logic:" section.
+        4. NO MARKDOWN: Use plain text only. Never use bolding, asterisks, or bullet points.
+        5. LENGTH: Use as many sentences as needed to be thorough (3-5 sentences), but keep it concise.
+        6. Encouraging and helpful tone.` }]
       }
     });
 
@@ -256,7 +256,8 @@ export async function getAptitudeExplanation(question: string, correctAnswer: st
       The student chose: ${userAnswer}
       The correct answer is actually: ${correctAnswer}
       
-      Please explain why ${correctAnswer} is correct in the simplest terms possible.
+      Please provide a detailed, step-by-step explanation of why ${correctAnswer} is the correct answer. 
+      Break down the logic clearly so the student can learn from their mistake.
     `;
 
     const result = await model.generateContent({
