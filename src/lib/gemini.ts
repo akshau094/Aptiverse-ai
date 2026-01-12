@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { Question } from "@/lib/questions";
 
-const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "AIzaSyDJD_fl-2y-j-cmUiz-JIBE_e4lt--9a80";
 const genAI = new GoogleGenerativeAI(apiKey);
 
 export async function startInterview(role: string, isParagraph: boolean = false) {

@@ -694,8 +694,13 @@ function InterviewContent() {
         
         if (res.status === 401) {
           aiFeedback = "ERROR: API Key is invalid. Please update OPENROUTER_API_KEY in Vercel Settings.";
-        } else if (res.status === 500 && (errorData.error?.includes("OPENROUTER_API_KEY") || errorData.message?.includes("OPENROUTER_API_KEY") || errorData.error?.includes("missing"))) {
-          aiFeedback = "ERROR: OPENROUTER_API_KEY is missing from Vercel Environment Variables. The AI cannot generate feedback without this key.";
+        } else if (res.status === 500 && (
+          errorData.error?.includes("OPENROUTER_API_KEY") || 
+          errorData.message?.includes("OPENROUTER_API_KEY") || 
+          errorData.error?.includes("missing") ||
+          errorData.details?.includes("API keys")
+        )) {
+          aiFeedback = `ERROR: AI Configuration Issue. ${errorData.details || "Please check your API keys in Vercel."}`;
         } else {
           aiFeedback = `AI Error: ${errorData.error || errorData.message || "The AI service is currently unavailable. Please check your internet and API keys."}`;
         }
@@ -921,9 +926,15 @@ function InterviewContent() {
                     }`}>
                       {feedback}
                     </p>
-                    {feedback.includes("OPENROUTER_API_KEY") && (
+                    {(feedback.includes("OPENROUTER_API_KEY") || feedback.includes("AI Configuration Issue")) && (
                       <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-2xl text-sm text-red-700">
-                        <strong>How to fix:</strong> Go to your Vercel Dashboard → Project Settings → Environment Variables. Update <code>OPENROUTER_API_KEY</code> with your new key <code>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</code>, then redeploy the project.
+                        <strong>How to fix:</strong> Go to your Vercel Dashboard → Project Settings → Environment Variables. 
+                        <br/><br/>
+                        1. Update <code>OPENROUTER_API_KEY</code> with: <code>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</code>
+                        <br/>
+                        2. Add <code>NEXT_PUBLIC_GEMINI_API_KEY</code> with: <code>AIzaSyDJD_fl-2y-j-cmUiz-JIBE_e4lt--9a80</code>
+                        <br/><br/>
+                        After updating, <strong>Redeploy</strong> the project for changes to take effect.
                       </div>
                     )}
                   </motion.div>
