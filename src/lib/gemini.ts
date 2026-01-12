@@ -5,7 +5,7 @@ const apiKey = process.env.GEMINI_API_KEY;
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
 export async function startInterview(role: string, isParagraph: boolean = false) {
-  if (!apiKey) {
+  if (!apiKey || !genAI) {
     console.error("Gemini API key is missing. Please set GEMINI_API_KEY in your environment.");
     if (isParagraph) {
       return "I am a highly motivated professional with a strong background in technical problem-solving and cross-functional collaboration. Throughout my career, I have consistently demonstrated a commitment to excellence and a proactive approach to challenges. My ability to adapt to new environments and master complex systems has allowed me to deliver high-quality results consistently. I am eager to bring my expertise and passion for innovation to your team, contributing to the continued success and growth of the organization while further developing my professional skills.";
@@ -65,7 +65,7 @@ export async function processInterviewStep(
   technicalQuestions?: Question[],
   metrics?: { confidence: number }
 ) {
-  if (!apiKey) {
+  if (!apiKey || !genAI) {
     console.error("Gemini API key is missing. Please set GEMINI_API_KEY in your environment.");
     return "FEEDBACK: I'm currently unable to provide real-time feedback due to a missing API key. However, please continue your practice!\nNEXT_QUESTION: Let's move to the next part of our assessment.";
   }
@@ -182,6 +182,10 @@ export async function processInterviewStep(
 }
 
 export async function reviewGoCode(challengeTitle: string, problemStatement: string, code: string) {
+  if (!apiKey || !genAI) {
+    console.error("Gemini API key is missing. Please set GEMINI_API_KEY in your environment.");
+    return "FEEDBACK: I'm currently unable to review code due to a missing API key. Please set GEMINI_API_KEY.";
+  }
   try {
     const model = genAI.getGenerativeModel({ 
       model: "gemini-1.5-flash",
@@ -226,7 +230,7 @@ export async function reviewGoCode(challengeTitle: string, problemStatement: str
 }
 
 export async function getAptitudeExplanation(question: string, correctAnswer: string, userAnswer: string) {
-  if (!apiKey) {
+  if (!apiKey || !genAI) {
     console.error("Gemini API key is missing.");
     return `ERROR: GEMINI_API_KEY is missing from Vercel Environment Variables. The AI cannot generate feedback without this key. 
     
