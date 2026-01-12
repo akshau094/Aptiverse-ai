@@ -7,7 +7,6 @@ import { CheckCircle2, XCircle, ChevronRight, Trophy, Timer, Bot, Sparkles, Load
 import Link from 'next/link';
 import Scene from '@/components/Scene';
 import { getQuestions, Question } from '@/lib/questions';
-import { getAptitudeExplanation } from '@/lib/gemini';
 
 function TestContent() {
   const searchParams = useSearchParams();
@@ -64,11 +63,20 @@ function TestContent() {
       // Trigger AI Chatbot for wrong answers
       setIsAiLoading(true);
       try {
-        const explanation = await getAptitudeExplanation(
-          currentQ.question,
-          currentQ.options[currentQ.correctAnswer],
-          currentQ.options[index]
-        );
+        const response = await fetch("/api/aptitude/explain", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question: currentQ.question,
+            correctAnswer: currentQ.options[currentQ.correctAnswer],
+            userAnswer: currentQ.options[index],
+          }),
+        });
+
+        if (!response.ok) throw new Error("API failure");
+        const data = await response.json();
+        const explanation = data.explanation;
+        
         setAiExplanation(explanation);
         // Intro phrase then explanation
         speak(`AptiVerse.Live Assessment. ${explanation}`);

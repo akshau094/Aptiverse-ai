@@ -285,11 +285,11 @@ function InterviewContent() {
   }, [isCameraOn]);
 
   const [debugMode, setDebugMode] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<{api: string, keyPresent: boolean}[]>([]);
+  const [debugInfo, setDebugInfo] = useState<{api: string, status?: string, keyPresent?: boolean}[]>([]);
 
   const checkApiStatus = async () => {
     const info = [
-      { api: "Gemini (Client)", keyPresent: !!process.env.NEXT_PUBLIC_GEMINI_API_KEY },
+      { api: "Gemini", status: "Secure Server-Side" },
     ];
     
     try {
@@ -802,10 +802,10 @@ function InterviewContent() {
               <p className="text-slate-400">Device: {typeof window !== 'undefined' ? window.navigator.userAgent.slice(0, 70) + '...' : 'Unknown'}</p>
               {debugInfo.map((info, i) => (
                 <p key={i} className="flex items-center gap-2">
-                  <span className={info.keyPresent ? "text-emerald-400" : "text-rose-400"}>
-                    {info.keyPresent ? "✓" : "✗"}
+                  <span className={(info.keyPresent || info.status) ? "text-emerald-400" : "text-rose-400"}>
+                    {(info.keyPresent || info.status) ? "✓" : "✗"}
                   </span>
-                  {info.api}: {info.keyPresent ? "Key Detected" : "KEY MISSING"}
+                  {info.api}: {info.status || (info.keyPresent ? "Key Detected" : "KEY MISSING")}
                 </p>
               ))}
               <p className="mt-4 text-slate-500 italic">Tip: If keys show "MISSING" but you added them to Vercel, you must go to the "Deployments" tab in Vercel and click "Redeploy" to activate them.</p>
@@ -932,7 +932,7 @@ function InterviewContent() {
                         <br/><br/>
                         1. Update <code>OPENROUTER_API_KEY</code> with: <code>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</code>
                         <br/>
-                        2. Add <code>NEXT_PUBLIC_GEMINI_API_KEY</code> with: <code>AIzaSyDJD_fl-2y-j-cmUiz-JIBE_e4lt--9a80</code>
+                        2. Add <code>GEMINI_API_KEY</code> with: <code>AIzaSyDJD_fl-2y-j-cmUiz-JIBE_e4lt--9a80</code>
                         <br/><br/>
                         After updating, <strong>Redeploy</strong> the project for changes to take effect.
                       </div>
