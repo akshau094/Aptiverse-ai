@@ -227,8 +227,10 @@ export async function reviewGoCode(challengeTitle: string, problemStatement: str
 
 export async function getAptitudeExplanation(question: string, correctAnswer: string, userAnswer: string) {
   if (!apiKey) {
-    console.error("Gemini API key is missing. Please set NEXT_PUBLIC_GEMINI_API_KEY in your environment.");
-    return `The correct answer is ${correctAnswer}. (AI explanation unavailable: API key missing)`;
+    console.error("Gemini API key is missing.");
+    return `ERROR: NEXT_PUBLIC_GEMINI_API_KEY is missing from Vercel Environment Variables. The AI cannot generate feedback without this key. 
+    
+    How to fix: Go to your Vercel Dashboard → Project Settings → Environment Variables. Add NEXT_PUBLIC_GEMINI_API_KEY with your key AIzaSyDJD_fl-2y-j-cmUiz-JIBE_e4lt--9a80, then redeploy the project.`;
   }
   try {
     const model = genAI.getGenerativeModel({ 

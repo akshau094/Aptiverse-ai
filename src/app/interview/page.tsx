@@ -923,7 +923,7 @@ function InterviewContent() {
                     </p>
                     {feedback.includes("OPENROUTER_API_KEY") && (
                       <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-2xl text-sm text-red-700">
-                        <strong>How to fix:</strong> Go to your Vercel Dashboard → Project Settings → Environment Variables. Update <code>OPENROUTER_API_KEY</code> with your new key, then redeploy the project.
+                        <strong>How to fix:</strong> Go to your Vercel Dashboard → Project Settings → Environment Variables. Update <code>OPENROUTER_API_KEY</code> with your new key <code>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</code>, then redeploy the project.
                       </div>
                     )}
                   </motion.div>
