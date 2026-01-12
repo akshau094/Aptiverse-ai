@@ -1,4 +1,4 @@
-import { Question } from '@/lib/questions';
+ import { Question } from '@/lib/questions';
 
 export const amazonQuestions: Question[] = [
   {
