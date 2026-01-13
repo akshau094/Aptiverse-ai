@@ -693,25 +693,24 @@ function InterviewContent() {
       });
 
       let aiFeedback = "";
-      if (res.ok) {
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: "Unknown error" }));
+        console.error('Server error:', errorData);
+
+        let errorMsg = `AI Error: ${errorData.error || errorData.message || "The AI service is currently unavailable."}`;
+
+        if (errorData.details) {
+          errorMsg += `\nDetails: ${errorData.details}`;
+        }
+
+        if (errorData.debug) {
+          errorMsg += `\nDebug: Gemini ${errorData.debug.hasGemini ? '✅' : '❌'}, OpenRouter ${errorData.debug.hasOpenRouter ? '✅' : '❌'}`;
+        }
+
+        aiFeedback = errorMsg;
+      } else {
         const data = (await res.json()) as { feedback?: string };
         aiFeedback = (data.feedback || "").trim();
-      } else {
-        const errorData = await res.json().catch(() => ({ error: "Unknown error" }));
-        console.error('API Coach Error:', errorData);
-        
-        if (res.status === 401) {
-          aiFeedback = "ERROR: API Key is invalid. Please update OPENROUTER_API_KEY in Vercel Settings.";
-        } else if (res.status === 500 && (
-          errorData.error?.includes("OPENROUTER_API_KEY") || 
-          errorData.message?.includes("OPENROUTER_API_KEY") || 
-          errorData.error?.includes("missing") ||
-          errorData.details?.includes("API keys")
-        )) {
-          aiFeedback = `ERROR: AI Configuration Issue. ${errorData.details || "Please check your API keys in Vercel."}`;
-        } else {
-          aiFeedback = `AI Error: ${errorData.error || errorData.message || "The AI service is currently unavailable. Please check your internet and API keys."}`;
-        }
       }
 
       if (!aiFeedback) {

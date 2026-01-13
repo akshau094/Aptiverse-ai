@@ -86,7 +86,9 @@ function TestContent() {
           speak(`AptiVerse.Live Assessment. ${explanation}`);
         }
       } catch (err: any) {
-        const fallback = `AI Error: ${err.message || "Failed to connect to AI service"}. The correct answer is ${currentQ.options[currentQ.correctAnswer]}.`;
+        const fallback = `AI Error: ${err.message || "Failed to connect to AI service"}. 
+        
+        How to fix: Go to Vercel → Project Settings → Environment Variables. Add GEMINI_API_KEY with: AIzaSyB193PR6SZRZiYg978w9Rk7UoMO2c1P6aY, then redeploy.`;
         setAiExplanation(fallback);
         speak(fallback);
       } finally {
