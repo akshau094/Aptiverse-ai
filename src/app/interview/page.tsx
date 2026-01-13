@@ -939,9 +939,9 @@ function InterviewContent() {
                         <strong>How to fix:</strong> Go to your Vercel Dashboard → Project Settings → Environment Variables. 
                         <br/><br/>
                         1. Update <code>OPENROUTER_API_KEY</code> with: <code>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</code>
-                        <br/>
-                        2. Add <code>GEMINI_API_KEY</code> with: <code>AIzaSyDJD_fl-2y-j-cmUiz-JIBE_e4lt--9a80</code>
-                        <br/><br/>
+            <br/>
+            2. Add <code>GEMINI_API_KEY</code> with: <code>AIzaSyB193PR6SZRZiYg978w9Rk7UoMO2c1P6aY</code>
+            <br/><br/>
                         After updating, <strong>Redeploy</strong> the project for changes to take effect.
                       </div>
                     )}

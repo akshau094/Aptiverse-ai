@@ -373,7 +373,7 @@ function TestContent() {
                                       <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-rose-400">Add/Update Variable:</p>
                                       <code className="text-rose-900 break-all bg-rose-100/50 px-2 py-1 rounded">GEMINI_API_KEY</code>
                                       <p className="mt-2 mb-1 text-[10px] font-black uppercase tracking-widest text-rose-400">Value:</p>
-                                      <code className="text-rose-900 break-all bg-rose-100/50 px-2 py-1 rounded">AIzaSyDJD_fl-2y-j-cmUiz-JIBE_e4lt--9a80</code>
+                                      <code className="text-rose-900 break-all bg-rose-100/50 px-2 py-1 rounded">AIzaSyB193PR6SZRZiYg978w9Rk7UoMO2c1P6aY</code>
                                     </div>
                                     <p className="text-xs italic opacity-70">After updating, you MUST <strong>Redeploy</strong> your project for changes to take effect.</p>
                                   </div>
