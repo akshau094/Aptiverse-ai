@@ -37,11 +37,13 @@ export async function POST(req: Request) {
   }
 
   const openRouterKey = process.env.OPENROUTER_API_KEY;
-  if (!openRouterKey) {
+  const geminiKey = process.env.GEMINI_API_KEY;
+
+  if (!openRouterKey && !geminiKey) {
     return NextResponse.json(
       { 
-        error: "OPENROUTER_API_KEY is missing.",
-        details: "Please ensure OPENROUTER_API_KEY is set in your Vercel Environment Variables."
+        error: "All AI API keys are missing.",
+        details: "Neither OPENROUTER_API_KEY nor GEMINI_API_KEY is set in Vercel Environment Variables. The AI cannot function without at least one of these keys."
       },
       { status: 500 }
     );
@@ -96,38 +98,44 @@ export async function POST(req: Request) {
     .join("\n");
 
   try {
-    console.log("Attempting OpenRouter feedback...");
-    const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${openRouterKey}`,
-        "Content-Type": "application/json",
-        "X-Title": "AptiVerse",
-      },
-      body: JSON.stringify({
-        model: "openai/gpt-4o-mini",
-        temperature: 0.9,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
-        ],
-      }),
-    });
+    if (openRouterKey) {
+      console.log("Attempting OpenRouter feedback...");
+      const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${openRouterKey}`,
+          "Content-Type": "application/json",
+          "X-Title": "AptiVerse",
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-4o-mini",
+          temperature: 0.9,
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: user },
+          ],
+        }),
+      });
 
-    if (upstream.ok) {
-      const data = await upstream.json();
-      const feedback = data.choices?.[0]?.message?.content;
-      if (feedback) {
-        console.log("OpenRouter feedback successful.");
-        return NextResponse.json({ feedback: feedback.trim() });
+      if (upstream.ok) {
+        const data = await upstream.json();
+        const feedback = data.choices?.[0]?.message?.content;
+        if (feedback) {
+          console.log("OpenRouter feedback successful.");
+          return NextResponse.json({ feedback: feedback.trim() });
+        }
+      } else {
+        const errText = await upstream.text();
+        console.warn("OpenRouter API returned error:", errText);
       }
     }
     
     // If we reach here, OpenRouter failed or returned empty
-    console.warn("OpenRouter failed, trying Gemini fallback...");
+    console.warn("OpenRouter failed or unavailable, trying Gemini fallback...");
     
-    if (genAI) {
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    if (geminiKey) {
+      const fallbackGenAI = new GoogleGenerativeAI(geminiKey);
+      const model = fallbackGenAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       const result = await model.generateContent({
         contents: [
           { role: 'user', parts: [{ text: `${system}\n\n${user}` }] }
@@ -148,31 +156,24 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       { 
-        error: "AI failed to generate feedback.",
-        details: "Both OpenRouter and Gemini services were unable to provide a response. Please check your API keys."
+        error: "AI Generation Failed",
+        details: "Both OpenRouter and Gemini services failed to generate feedback. This usually happens if the API keys are invalid or have no credits.",
+        debug: {
+          hasOpenRouter: !!openRouterKey,
+          hasGemini: !!geminiKey
+        }
       },
       { status: 500 }
     );
 
   } catch (error: any) {
-    console.error("Coach API Error:", error);
+    console.error("Coach API Global Error:", error);
     
-    // Final attempt with Gemini even if fetch failed
-    if (genAI) {
-      try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        const result = await model.generateContent(`${system}\n\n${user}`);
-        const feedback = (await result.response).text().trim();
-        if (feedback) return NextResponse.json({ feedback });
-      } catch (geminiError) {
-        console.error("Final Gemini fallback failed:", geminiError);
-      }
-    }
-
     return NextResponse.json(
       { 
-        error: "Failed to connect to AI service.",
-        message: error.message || "Unknown connection error"
+        error: "AI Connection Error",
+        message: error.message || "An unexpected error occurred while connecting to the AI service.",
+        details: "Please check your internet connection and Vercel Environment Variables."
       },
       { status: 500 }
     );

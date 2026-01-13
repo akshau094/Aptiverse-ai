@@ -12,12 +12,35 @@ export async function POST(req: Request) {
       );
     }
 
+    const geminiKey = process.env.GEMINI_API_KEY;
+    if (!geminiKey) {
+      return NextResponse.json(
+        { 
+          error: "GEMINI_API_KEY is missing.",
+          details: "The Gemini API key is not set in Vercel Environment Variables. The AI Tutor cannot generate feedback without this key."
+        },
+        { status: 500 }
+      );
+    }
+
     const explanation = await getAptitudeExplanation(question, correctAnswer, userAnswer);
+    
+    if (explanation.startsWith("ERROR:")) {
+      return NextResponse.json(
+        { error: "AI Generation Failed", details: explanation },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({ explanation });
   } catch (error: any) {
     console.error("Aptitude AI Error:", error);
     return NextResponse.json(
-      { error: "Failed to generate AI explanation.", details: error.message },
+      { 
+        error: "AI Connection Error", 
+        message: error.message || "An unexpected error occurred while connecting to the AI service.",
+        details: "Please check your internet connection and Vercel Environment Variables."
+      },
       { status: 500 }
     );
   }

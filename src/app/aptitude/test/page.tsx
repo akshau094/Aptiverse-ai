@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, XCircle, ChevronRight, Trophy, Timer, Bot, Sparkles, Loader2, Volume2, VolumeX } from 'lucide-react';
+import { CheckCircle2, XCircle, ChevronRight, Trophy, Timer, Bot, Sparkles, Loader2, Volume2, VolumeX, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import Scene from '@/components/Scene';
 import { getQuestions, Question } from '@/lib/questions';
@@ -73,15 +73,20 @@ function TestContent() {
           }),
         });
 
-        if (!response.ok) throw new Error("API failure");
         const data = await response.json();
-        const explanation = data.explanation;
         
-        setAiExplanation(explanation);
-        // Intro phrase then explanation
-        speak(`AptiVerse.Live Assessment. ${explanation}`);
-      } catch {
-        const fallback = `AptiVerse.Live Assessment. The correct answer is ${currentQ.options[currentQ.correctAnswer]}. It satisfies the logic required by the question.`;
+        if (!response.ok) {
+          const errorMsg = `ERROR: ${data.error || "AI Service Unavailable"}. ${data.details || "Please check your configuration."}`;
+          setAiExplanation(errorMsg);
+          speak(errorMsg);
+        } else {
+          const explanation = data.explanation;
+          setAiExplanation(explanation);
+          // Intro phrase then explanation
+          speak(`AptiVerse.Live Assessment. ${explanation}`);
+        }
+      } catch (err: any) {
+        const fallback = `AI Error: ${err.message || "Failed to connect to AI service"}. The correct answer is ${currentQ.options[currentQ.correctAnswer]}.`;
         setAiExplanation(fallback);
         speak(fallback);
       } finally {
@@ -346,11 +351,34 @@ function TestContent() {
                             <div className="space-y-6">
                               <div className="space-y-4">
                                 {aiExplanation?.split('\n\n').map((paragraph, i) => (
-                                  <p key={i} className="text-slate-700 leading-relaxed text-lg font-medium">
-                                    {paragraph.trim()}
+                                  <p key={i} className={`leading-relaxed text-lg font-medium ${
+                                    aiExplanation.startsWith("ERROR") || aiExplanation.startsWith("AI Error")
+                                    ? "text-rose-700"
+                                    : "text-slate-700"
+                                  }`}>
+                                    {paragraph}
                                   </p>
                                 ))}
                               </div>
+
+                              {(aiExplanation?.includes("GEMINI_API_KEY") || aiExplanation?.includes("AI Configuration Issue") || aiExplanation?.includes("missing")) && (
+                                <div className="mt-6 p-6 bg-rose-50 border border-rose-100 rounded-3xl text-sm text-rose-700">
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <AlertCircle size={16} className="text-rose-600" />
+                                    <strong className="font-black uppercase tracking-widest text-[10px]">How to fix:</strong>
+                                  </div>
+                                  <div className="space-y-3 font-medium">
+                                    <p>Go to your <strong>Vercel Dashboard</strong> → <strong>Project Settings</strong> → <strong>Environment Variables</strong>.</p>
+                                    <div className="bg-white/50 p-3 rounded-xl border border-rose-100">
+                                      <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-rose-400">Add/Update Variable:</p>
+                                      <code className="text-rose-900 break-all bg-rose-100/50 px-2 py-1 rounded">GEMINI_API_KEY</code>
+                                      <p className="mt-2 mb-1 text-[10px] font-black uppercase tracking-widest text-rose-400">Value:</p>
+                                      <code className="text-rose-900 break-all bg-rose-100/50 px-2 py-1 rounded">AIzaSyDJD_fl-2y-j-cmUiz-JIBE_e4lt--9a80</code>
+                                    </div>
+                                    <p className="text-xs italic opacity-70">After updating, you MUST <strong>Redeploy</strong> your project for changes to take effect.</p>
+                                  </div>
+                                </div>
+                              )}
                               <div className="pt-6 border-t border-slate-200 flex items-center gap-3">
                                 <div className="flex -space-x-2">
                                   {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full bg-slate-200 border-2 border-white" />)}

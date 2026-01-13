@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, MicOff, MessageSquare, ArrowLeft, RefreshCw, Volume2, VolumeX, Sparkles, Video, VideoOff, Activity, Award, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { startInterview } from '@/lib/gemini';
 
 const PRACTICE_PARAGRAPHS: string[] = [
   "I approach complex problems by breaking them into clear steps, validating assumptions early, and communicating progress transparently. In previous projects, I balanced speed with quality by writing small, testable changes and reviewing edge cases with stakeholders. I stay calm under pressure, ask clarifying questions when requirements shift, and take ownership of outcomes. I’m excited to contribute strong execution, thoughtful collaboration, and continuous improvement to the team’s goals.",
@@ -314,11 +313,20 @@ function InterviewContent() {
       loadRandomParagraph({ speakIntro: true });
 
       try {
-        const paragraph = await startInterview(role, true);
-        if (paragraph) {
-          setCurrentParagraph(paragraph);
+        const response = await fetch('/api/interview/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role, isParagraph: true }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.content) {
+            setCurrentParagraph(data.content);
+          }
         }
-      } catch {
+      } catch (err) {
+        console.error("AI Start Error:", err);
       }
     } catch (error) {
       console.error('Failed to start session:', error);
