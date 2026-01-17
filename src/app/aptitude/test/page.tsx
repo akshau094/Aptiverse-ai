@@ -88,7 +88,7 @@ function TestContent() {
       } catch (err: any) {
         const fallback = `AI Error: ${err.message || "Failed to connect to AI service"}. 
         
-        How to fix: Go to Vercel → Project Settings → Environment Variables. Add GEMINI_API_KEY with: AIzaSyBt187UBrfhUaBn4Pqt84_ytlAl2j6nhqA, then redeploy.`;
+        How to fix: Go to Vercel → Project Settings → Environment Variables. Add OPENROUTER_API_KEY with: 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, then redeploy.`;
         setAiExplanation(fallback);
         speak(fallback);
       } finally {
@@ -363,23 +363,30 @@ function TestContent() {
                                 ))}
                               </div>
 
-                              {(aiExplanation?.includes("GEMINI_API_KEY") || aiExplanation?.includes("AI Configuration Issue") || aiExplanation?.includes("missing")) && (
-                                <div className="mt-6 p-6 bg-rose-50 border border-rose-100 rounded-3xl text-sm text-rose-700">
-                                  <div className="flex items-center gap-2 mb-3">
-                                    <AlertCircle size={16} className="text-rose-600" />
-                                    <strong className="font-black uppercase tracking-widest text-[10px]">How to fix:</strong>
-                                  </div>
-                                  <div className="space-y-3 font-medium">
-                                    <p>Go to your <strong>Vercel Dashboard</strong> → <strong>Project Settings</strong> → <strong>Environment Variables</strong>.</p>
-                                    <div className="bg-white/50 p-3 rounded-xl border border-rose-100">
-                                      <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-rose-400">Add/Update Variable:</p>
-                                      <code className="text-rose-900 break-all bg-rose-100/50 px-2 py-1 rounded">GEMINI_API_KEY</code>
-                                      <p className="mt-2 mb-1 text-[10px] font-black uppercase tracking-widest text-rose-400">Value:</p>
-                                      <code className="text-rose-900 break-all bg-rose-100/50 px-2 py-1 rounded">AIzaSyB193PR6SZRZiYg978w9Rk7UoMO2c1P6aY</code>
+                              {(aiExplanation?.includes("OPENROUTER_API_KEY") || aiExplanation?.includes("AI Configuration Issue") || aiExplanation?.includes("missing")) && (
+                                <motion.div 
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  className="mt-6 p-6 bg-rose-50 rounded-3xl border border-rose-100/50 space-y-4"
+                                >
+                                  <div className="flex items-start gap-3 text-rose-700">
+                                    <AlertCircle className="w-5 h-5 mt-1 shrink-0" />
+                                    <div className="text-sm">
+                                      <p className="font-bold mb-1">Configuration Required</p>
+                                      <p className="opacity-80">Please add your API key to Vercel Environment Variables:</p>
                                     </div>
-                                    <p className="text-xs italic opacity-70">After updating, you MUST <strong>Redeploy</strong> your project for changes to take effect.</p>
                                   </div>
-                                </div>
+                                  <div className="space-y-3">
+                                    <div className="bg-white/50 p-3 rounded-2xl">
+                                      <p className="text-[10px] font-black uppercase tracking-widest text-rose-400 mb-1">Variable Name</p>
+                                      <code className="text-rose-900 break-all bg-rose-100/50 px-2 py-1 rounded">OPENROUTER_API_KEY</code>
+                                    </div>
+                                    <div className="bg-white/50 p-3 rounded-2xl">
+                                      <p className="text-[10px] font-black uppercase tracking-widest text-rose-400 mb-1">Value</p>
+                                      <code className="text-rose-900 break-all bg-rose-100/50 px-2 py-1 rounded">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</code>
+                                    </div>
+                                  </div>
+                                </motion.div>
                               )}
                               <div className="pt-6 border-t border-slate-200 flex items-center gap-3">
                                 <div className="flex -space-x-2">

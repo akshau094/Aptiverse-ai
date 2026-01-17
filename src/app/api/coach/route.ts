@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
 type CoachRequest = {
   paragraph: string;
@@ -17,10 +16,6 @@ type CoachRequest = {
   previousFeedback?: string | null;
 };
 
-// Use the Gemini API Key from environment variables
-const apiKey = process.env.GEMINI_API_KEY;
-const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
-
 export async function POST(req: Request) {
   let body: CoachRequest;
   try {
@@ -36,13 +31,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing paragraph or transcript." }, { status: 400 });
   }
 
-  const geminiKey = process.env.GEMINI_API_KEY;
+  const openRouterKey = process.env.OPENROUTER_API_KEY;
 
-  if (!geminiKey) {
+  if (!openRouterKey) {
     return NextResponse.json(
       { 
-        error: "GEMINI_API_KEY is missing.",
-        details: "The Gemini API key is not set in Vercel Environment Variables. The Communication Coach requires this key to function."
+        error: "OPENROUTER_API_KEY is missing.",
+        details: "The OpenRouter API key is not set in Vercel Environment Variables. The Communication Coach requires this key to function."
       },
       { status: 500 }
     );
@@ -97,47 +92,48 @@ export async function POST(req: Request) {
     .join("\n");
 
   try {
-    // Strictly use Gemini as requested
-    console.log("Attempting Gemini feedback...");
-    try {
-      const fallbackGenAI = new GoogleGenerativeAI(geminiKey);
-      const model = fallbackGenAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: "v1" });
-      const result = await model.generateContent({
-        contents: [
-          { role: 'user', parts: [{ text: `${system}\n\n${user}` }] }
+    // Use OpenRouter with DeepSeek R1 as requested
+    console.log("Attempting DeepSeek R1 feedback via OpenRouter...");
+    
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${openRouterKey}`,
+        "Content-Type": "application/json",
+        "X-Title": "AptiVerse",
+      },
+      body: JSON.stringify({
+        model: "deepseek/deepseek-r1",
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user }
         ],
-        generationConfig: {
-          temperature: 0.9,
-          maxOutputTokens: 500,
-        }
-      });
-      const response = await result.response;
-      const feedback = response.text().trim();
-      
-      if (feedback) {
-        console.log("Gemini feedback successful.");
-        return NextResponse.json({ feedback });
-      }
-    } catch (geminiError: any) {
-      console.warn("Gemini API failed:", geminiError.message);
-      return NextResponse.json(
-        { 
-          error: "Gemini AI Generation Failed",
-          details: geminiError.message || "The Gemini service returned an error. Please verify your GEMINI_API_KEY in Vercel.",
-          debug: {
-            hasGemini: !!geminiKey,
-          }
-        },
-        { status: 500 }
-      );
+        temperature: 0.7,
+        max_tokens: 500,
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error?.message || "OpenRouter API failed");
+    }
+
+    const data = await response.json();
+    const feedback = data.choices?.[0]?.message?.content?.trim();
+    
+    if (feedback) {
+      console.log("DeepSeek feedback successful.");
+      // Remove any <think> tags if they exist (DeepSeek R1 specific)
+      const cleanFeedback = feedback.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+      return NextResponse.json({ feedback: cleanFeedback });
     }
 
     return NextResponse.json(
       { 
         error: "AI Generation Failed",
-        details: "Gemini service failed to return feedback. Please verify your GEMINI_API_KEY in Vercel.",
+        details: "DeepSeek service failed to return feedback. Please verify your OPENROUTER_API_KEY in Vercel.",
         debug: {
-          hasGemini: !!geminiKey,
+          hasOpenRouter: !!openRouterKey,
         }
       },
       { status: 500 }

@@ -704,8 +704,8 @@ function InterviewContent() {
         }
 
         if (errorData.debug) {
-          errorMsg += `\nDebug: Gemini ${errorData.debug.hasGemini ? '✅' : '❌'}, OpenRouter ${errorData.debug.hasOpenRouter ? '✅' : '❌'}`;
-        }
+            errorMsg += `\nDebug: OpenRouter ${errorData.debug.hasOpenRouter ? '✅' : '❌'}`;
+          }
 
         aiFeedback = errorMsg;
       } else {
@@ -933,11 +933,11 @@ function InterviewContent() {
                     }`}>
                       {feedback}
                     </p>
-                    {(feedback.includes("GEMINI_API_KEY") || feedback.includes("AI Configuration Issue") || feedback.includes("AI Error")) && (
+                    {(feedback.includes("OPENROUTER_API_KEY") || feedback.includes("AI Configuration Issue") || feedback.includes("AI Error")) && (
                       <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-2xl text-sm text-red-700">
                         <strong>How to fix:</strong> Go to your Vercel Dashboard → Project Settings → Environment Variables. 
                         <br/><br/>
-                        1. Add <code>GEMINI_API_KEY</code> with: <code>AIzaSyBt187UBrfhUaBn4Pqt84_ytlAl2j6nhqA</code>
+                        1. Add <code>OPENROUTER_API_KEY</code> with: <code>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</code>
                         <br/><br/>
                         After updating, <strong>Redeploy</strong> the project for changes to take effect.
                       </div>
