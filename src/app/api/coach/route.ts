@@ -101,7 +101,7 @@ export async function POST(req: Request) {
     console.log("Attempting Gemini feedback...");
     try {
       const fallbackGenAI = new GoogleGenerativeAI(geminiKey);
-      const model = fallbackGenAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = fallbackGenAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: "v1" });
       const result = await model.generateContent({
         contents: [
           { role: 'user', parts: [{ text: `${system}\n\n${user}` }] }

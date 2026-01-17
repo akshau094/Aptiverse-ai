@@ -33,7 +33,7 @@ export async function startInterview(role: string, isParagraph: boolean = false)
         role: "system",
         parts: [{ text: systemPrompt }]
       }
-    });
+    }, { apiVersion: 'v1' });
     
     const prompt = isParagraph
       ? `Provide a professional interview response paragraph that a candidate for a ${role} role would read out loud to practice their delivery.`
@@ -98,7 +98,7 @@ export async function processInterviewStep(
              FEEDBACK: [Analysis of technical answer + Analysis of their voice confidence/delivery]
              NEXT_QUESTION: [Next question + options]` }]
       }
-    });
+    }, { apiVersion: 'v1' });
     
     const chat = model.startChat({
       history: history.slice(0, -1),
@@ -203,7 +203,7 @@ export async function reviewGoCode(challengeTitle: string, problemStatement: str
         Start with "FEEDBACK:" followed by your analysis.
         End with a score out of 100.` }]
       }
-    });
+    }, { apiVersion: 'v1' });
 
     const prompt = `
       Challenge: ${challengeTitle}
@@ -257,7 +257,7 @@ export async function getAptitudeExplanation(question: string, correctAnswer: st
         - SEPARATION: Use double newlines (\n\n) between the three sections.
         - TONE: Professional, encouraging, and master-level tutoring.` }]
       }
-    });
+    }, { apiVersion: 'v1' });
 
     const prompt = `
       QUESTION: ${question}
