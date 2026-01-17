@@ -933,14 +933,12 @@ function InterviewContent() {
                     }`}>
                       {feedback}
                     </p>
-                    {(feedback.includes("OPENROUTER_API_KEY") || feedback.includes("AI Configuration Issue")) && (
+                    {(feedback.includes("GEMINI_API_KEY") || feedback.includes("AI Configuration Issue") || feedback.includes("AI Error")) && (
                       <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-2xl text-sm text-red-700">
                         <strong>How to fix:</strong> Go to your Vercel Dashboard → Project Settings → Environment Variables. 
                         <br/><br/>
-                        1. Update <code>OPENROUTER_API_KEY</code> with: <code>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</code>
-            <br/>
-            2. Add <code>GEMINI_API_KEY</code> with: <code>AIzaSyB193PR6SZRZiYg978w9Rk7UoMO2c1P6aY</code>
-            <br/><br/>
+                        1. Add <code>GEMINI_API_KEY</code> with: <code>AIzaSyBt187UBrfhUaBn4Pqt84_ytlAl2j6nhqA</code>
+                        <br/><br/>
                         After updating, <strong>Redeploy</strong> the project for changes to take effect.
                       </div>
                     )}

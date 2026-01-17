@@ -234,7 +234,7 @@ export async function getAptitudeExplanation(question: string, correctAnswer: st
     console.error("Gemini API key is missing.");
     return `ERROR: GEMINI_API_KEY is missing from Vercel Environment Variables. The AI cannot generate feedback without this key. 
     
-    How to fix: Go to your Vercel Dashboard → Project Settings → Environment Variables. Add GEMINI_API_KEY with your key AIzaSyB193PR6SZRZiYg978w9Rk7UoMO2c1P6aY, then redeploy the project.`;
+    How to fix: Go to your Vercel Dashboard → Project Settings → Environment Variables. Add GEMINI_API_KEY with your key AIzaSyBt187UBrfhUaBn4Pqt84_ytlAl2j6nhqA, then redeploy the project.`;
   }
   try {
     const model = genAI.getGenerativeModel({ 
